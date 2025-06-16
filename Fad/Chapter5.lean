@@ -340,7 +340,76 @@ instance : BoundedOrder Char where
 #eval (Finset.Icc ⊥ ⊤ : Finset Char)
 -/
 
-
 end Bucketsort
+
+
+namespace SortingSums
+
+open Chapter5.Quicksort (qsort₂)
+open Chapter5.Mergesort (merge)
+
+variable {a : Type} [Ord a] [Add a]
+ [Sub a] [Neg a] [OfNat a 0] [LE a]
+ [DecidableRel (· ≤ · : a → a → Prop)]
+
+
+def sortsums₀ (xs ys : List a) : List a :=
+  qsort₂ compare (xs.flatMap (fun x => ys.map fun y => x + y))
+
+
+abbrev Label := Nat
+abbrev Pair := Label × Label
+
+def subs (xs ys : List (a × Label)) : List (a × Pair) :=
+  xs.flatMap (fun (x, i) =>
+   ys.map (fun (y, j) => (x - y, (i, j))))
+
+def switch : a × Pair → a × Pair
+| (x, (i, j)) => (-x, (j, i))
+
+
+def sortWith (abs : List (a × Pair)) (xis yis : List (a × Label))
+  : List (a × Pair) :=
+  let a := Std.HashMap.ofList (abs.map Prod.snd |>.zipIdx)
+  let cmp p₁ p₂ :=
+    let (_,(i,k)) := p₁
+    let (_,(j,l)) := p₂
+    compare a[(i,j)]! a[(k,l)]!
+  qsort₂ cmp (subs xis yis)
+
+-- fixme? I am partial
+partial def sortsubs₁ : List (a × Label) → List (a × Pair)
+  | [] => []
+  | [(_,i)] => [(0, (i, i))]
+  | xis =>
+    let p := List.MergeSort.Internal.splitInTwo
+      (Subtype.mk xis rfl)
+    /- have : (xis.length + 1) / 2 < xis.length :=
+      have h₁ := p.1.prop
+      have h₂ := p.2.prop
+      sorry -/
+    let abs : List (a × Pair) :=
+      merge (sortsubs₁ p.1) (sortsubs₁ p.2)
+    let cs := sortWith abs p.1 p.2
+    let ds := cs.map switch |>.reverse
+    merge abs (merge cs ds)
+ -- termination_by xis => xis.length
+
+def sortsubs (xs ys : List a) : List a :=
+ let   n := xs.length
+ let xis := xs.zipIdx
+ let yis := ys.zipIdx n
+ let abs := merge (sortsubs₁ xis) (sortsubs₁ yis)
+ sortWith abs xis yis |>.map Prod.fst
+
+
+def sortsums₁ (xs ys : List a) : List a :=
+  sortsubs xs (ys.map Neg.neg)
+
+
+#eval sortsums₁ [1, 2, 3] [4, 5, 6]
+
+end SortingSums
+
 
 end Chapter5

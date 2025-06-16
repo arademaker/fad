@@ -135,8 +135,7 @@ def isEmpty (sl : SymList a) : Bool :=
   sl.lhs.isEmpty ∧ sl.rhs.isEmpty
 
 theorem sl_empty_l_empty :
-  ∀ sl : SymList a, isEmpty sl → (fromSL sl).isEmpty
-  := by
+  ∀ sl : SymList a, isEmpty sl → (fromSL sl).isEmpty := by
   intro sl h
   have ⟨as, bs, h₁⟩ := sl
   unfold isEmpty at h
@@ -145,8 +144,7 @@ theorem sl_empty_l_empty :
   assumption
 
 theorem sl_noempty_l_noempty :
-  ∀ sl : SymList a, ¬ isEmpty sl → (fromSL sl) ≠ []
-  := by
+  ∀ sl : SymList a, ¬ isEmpty sl → (fromSL sl) ≠ [] := by
   intro sl h
   have ⟨as, bs, h₁⟩ := sl
   unfold isEmpty at h
@@ -157,7 +155,7 @@ theorem sl_noempty_l_noempty :
 
 def lastSL (sl : SymList a) (ne : ¬ isEmpty sl) : a :=
  match sl with
- | ⟨xs, ys, _⟩ =>
+ | ⟨xs, ys, ok⟩ =>
    if h₁ : ys.isEmpty then
      xs.head (by
       unfold isEmpty at ne; simp at ne
@@ -170,20 +168,33 @@ def lastSL (sl : SymList a) (ne : ¬ isEmpty sl) : a :=
      ys.head (by simp at h₁ ; exact h₁)
 
 def lastSL? : SymList a → Option a
- | ⟨[], [], _⟩     => none
- | ⟨x :: _, [], _⟩ => x
- | ⟨[], y :: _, _⟩ => y
- | ⟨_, y :: _, _⟩  => y
+ | ⟨[]    , []    , _⟩ => none
+ | ⟨x :: _, []    , _⟩ => x
+ | ⟨_     , y :: _, _⟩ => y
 
+
+/-
 example (sl : SymList a) (h : ¬ isEmpty sl)
   : (fromSL sl).getLast (sl_noempty_l_noempty sl h) = lastSL sl h := by
-  have ⟨as, bs, h₂⟩ := sl
+  let ⟨as, bs, h₂⟩ := sl
   unfold lastSL fromSL
   have h₃ := sl_noempty_l_noempty _ h
   simp [fromSL] at h₃ ; simp
-  sorry
+  split_ifs with h₁
+  · -- Case: bs.isEmpty is true
+    rewrite [h₁] at h₂ ; simp at h₂
+    apply Or.elim h₂ ; intro h₄
+    rw [h₄]
+    sorry
+    simp [List.getLast_append_of_ne_nil]
+    apply h₃
+  · -- Case: bs.isEmpty is false
+    simp [List.getLast_append]
+    simp at h₁
+    sorry
+    -- rw [List.getLast_reverse]
+    · exact h₁
 
-/-
 example {a : Type} : List.getLast? ∘ fromSL = @lastSL a := by
   funext sl
   have ⟨lhs, rhs, ok⟩ := sl
