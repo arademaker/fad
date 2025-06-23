@@ -345,8 +345,8 @@ end Bucketsort
 
 namespace SortingSums
 
-open Chapter5.Quicksort (qsort₂)
-open Chapter5.Mergesort (merge)
+open Quicksort (qsort₂)
+open Mergesort (merge)
 
 variable {a : Type} [Ord a] [Add a]
  [Sub a] [Neg a] [OfNat a 0] [LE a]
@@ -367,41 +367,33 @@ def subs (xs ys : List (a × Label)) : List (a × Pair) :=
 def switch : a × Pair → a × Pair
 | (x, (i, j)) => (-x, (j, i))
 
-
 def sortWith (abs : List (a × Pair)) (xis yis : List (a × Label))
   : List (a × Pair) :=
-  let a := Std.HashMap.ofList (abs.map Prod.snd |>.zipIdx)
+  let a := Std.HashMap.ofList (qsort₂ compare abs |>.map Prod.snd |>.zipIdx)
   let cmp p₁ p₂ :=
     let (_,(i,k)) := p₁
     let (_,(j,l)) := p₂
     compare a[(i,j)]! a[(k,l)]!
   qsort₂ cmp (subs xis yis)
 
--- fixme? I am partial
-partial def sortsubs₁ : List (a × Label) → List (a × Pair)
-  | [] => []
-  | [(_,i)] => [(0, (i, i))]
-  | xis =>
-    let p := List.MergeSort.Internal.splitInTwo
-      (Subtype.mk xis rfl)
-    /- have : (xis.length + 1) / 2 < xis.length :=
-      have h₁ := p.1.prop
-      have h₂ := p.2.prop
-      sorry -/
-    let abs : List (a × Pair) :=
-      merge (sortsubs₁ p.1) (sortsubs₁ p.2)
-    let cs := sortWith abs p.1 p.2
+def sortsubs₁ : List (a × Label) → Nat → List (a × Pair)
+  | [], _ => []
+  | [(_,i)], _ => [(0, (i, i))]
+  | _, 0 => []
+  | xis, fuel+1 =>
+    let mid := xis.length / 2
+    let (xis1, xis2) := xis.splitAt mid
+    let abs := merge (sortsubs₁ xis1 (fuel/2)) (sortsubs₁ xis2 (fuel/2))
+    let cs := sortWith abs xis1 xis2
     let ds := cs.map switch |>.reverse
     merge abs (merge cs ds)
- -- termination_by xis => xis.length
 
 def sortsubs (xs ys : List a) : List a :=
  let   n := xs.length
  let xis := xs.zipIdx
  let yis := ys.zipIdx n
- let abs := merge (sortsubs₁ xis) (sortsubs₁ yis)
+ let abs := merge (sortsubs₁ xis xis.length) (sortsubs₁ yis yis.length)
  sortWith abs xis yis |>.map Prod.fst
-
 
 def sortsums₁ (xs ys : List a) : List a :=
   sortsubs xs (ys.map Neg.neg)
