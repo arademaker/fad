@@ -343,6 +343,8 @@ instance : BoundedOrder Char where
 end Bucketsort
 
 
+-- ## Section 5.5 Sorting sums
+
 namespace SortingSums
 
 open Quicksort (qsort₂)
@@ -352,10 +354,8 @@ variable {a : Type} [Ord a] [Add a]
  [Sub a] [Neg a] [OfNat a 0] [LE a]
  [DecidableRel (· ≤ · : a → a → Prop)]
 
-
 def sortsums₀ (xs ys : List a) : List a :=
   qsort₂ compare (xs.flatMap (fun x => ys.map fun y => x + y))
-
 
 abbrev Label := Nat
 abbrev Pair := Label × Label
@@ -377,13 +377,13 @@ def sortWith (abs : List (a × Pair)) (xis yis : List (a × Label))
   qsort₂ cmp (subs xis yis)
 
 def sortsubs₁ : List (a × Label) → Nat → List (a × Pair)
-  | [], _ => []
-  | [(_,i)], _ => [(0, (i, i))]
-  | _, 0 => []
-  | xis, fuel+1 =>
+  | []     , _        => []
+  | [(_,i)], _        => [(0, (i, i))]
+  | _      , 0        => panic! "never here"
+  | xis    , fuel + 1 =>
     let mid := xis.length / 2
     let (xis1, xis2) := xis.splitAt mid
-    let abs := merge (sortsubs₁ xis1 (fuel/2)) (sortsubs₁ xis2 (fuel/2))
+    let abs := merge (sortsubs₁ xis1 fuel) (sortsubs₁ xis2 fuel)
     let cs := sortWith abs xis1 xis2
     let ds := cs.map switch |>.reverse
     merge abs (merge cs ds)
@@ -398,8 +398,11 @@ def sortsubs (xs ys : List a) : List a :=
 def sortsums₁ (xs ys : List a) : List a :=
   sortsubs xs (ys.map Neg.neg)
 
-
+/-
+#eval sortsums₀ [1, 2, 3] [4, 5, 6]
 #eval sortsums₁ [1, 2, 3] [4, 5, 6]
+-/
+
 
 end SortingSums
 
