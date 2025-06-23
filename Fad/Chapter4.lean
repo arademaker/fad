@@ -388,10 +388,9 @@ def search {b : Type} [Ord b] (key : a → b) (k : b)
 end BST2
 
 namespace DSet
-open BST2 (insert node)
+open BST2 (Tree insert node balance gbalance mkTree)
 
 abbrev Set a := BST2.Tree a
-
 
 def member {a : Type} [LT a] [DecidableRel (α := a) (· < ·)] (x : a) : Set a → Bool
 | .null => false
@@ -399,6 +398,90 @@ def member {a : Type} [LT a] [DecidableRel (α := a) (· < ·)] (x : a) : Set a 
   if x < y      then member x l
   else if x > y then member x r
   else true
+
+inductive Piece (α : Type) : Type
+| lp : Set α → α → Piece α
+| rp : α → Set α → Piece α
+
+@[simp]
+theorem flatten_left_lt  {α : Type}
+    {t : Tree α} {h : Nat} {l r : Tree α} {x : α}
+    (ht : t = Tree.node h l x r) :
+    (Tree.flatten t).length > (Tree.flatten l).length := by
+  subst ht
+  have :
+    (Tree.flatten (Tree.node h l x r)).length = (Tree.flatten l).length + 1 + (Tree.flatten r).length := by
+    simp [Tree.flatten, List.length_append, List.length_cons]
+    omega
+  simp
+  omega
+
+def deleteMin {α : Type} (t  : Set α) (ht : t ≠ .null) :
+  α × Set α := by
+  cases hEq : t with
+  | null =>
+      contradiction
+  | node h l x r =>
+      cases l with
+      | null =>
+          exact (x, r)
+      | node hₗ lₗ yₗ rₗ =>
+          let (y, l') := deleteMin (.node hₗ lₗ yₗ rₗ) (by intro h; cases h)
+          exact (y, balance l' x r)
+termination_by t.flatten.length
+decreasing_by exact flatten_left_lt hEq
+
+def combine {a : Type} [LT a] [DecidableRel (α := a) (· < ·)] :
+    Set a → Set a → Set a
+| .null, r => r
+| l, .null => l
+| l, r =>
+  match h : r with
+  | .null => l -- nunca vai chegar nesse caso
+  | .node a b c d =>
+    let (x, t) := deleteMin r (by rw [h]; intro H; cases H)
+    balance l x t
+
+def delete {a : Type} [LT a] [DecidableRel (α := a) (· < ·)] [DecidableEq a] :
+    a → Set a → Set a
+| _, .null => .null
+| x, .node _ l y r =>
+  if x < y then
+    balance (delete x l) y r
+  else if x > y then
+    balance l y (delete x r)
+  else
+    combine l r
+
+open Piece
+
+def pieces {α : Type} [LT α] [DecidableRel (α := α) (· < ·)] :
+    α → Set α → List (Piece α)
+| x, t =>
+  let rec addPiece : Set α → List (Piece α) → List (Piece α)
+  | .null, ps => ps
+  | .node _ l y r, ps =>
+    if x < y then
+      addPiece l (rp y r :: ps)
+    else
+      addPiece r (lp l y :: ps)
+  addPiece t []
+
+
+def sew {α : Type} : List (Piece α) → Set α × Set α :=
+  List.foldl step (.null, .null)
+where
+  step : Set α × Set α → Piece α → Set α × Set α
+  | (t1, t2), lp t x => (gbalance t x t1, t2)
+  | (t1, t2), rp x t => (t1, gbalance t2 x t)
+
+
+def split {α : Type} [LT α] [DecidableRel (α := α) (· < ·)] :
+    α → Set α → Set α × Set α :=
+  fun x t => sew (pieces x t)
+
+
+-- #eval pieces 10 (BST2.mkTree <| List.range 123213) |>.length
 
 end DSet
 

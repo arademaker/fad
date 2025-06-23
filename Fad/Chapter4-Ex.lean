@@ -226,7 +226,7 @@ open BST2
 
 def pair {α β : Type} (f : α -> β) (p : α × α) : (β × β) := (f p.1, f p.2)
 
-def split {α : Type} [LT α] [LE α]
+def split₁ {α : Type} [LT α] [LE α]
   [DecidableRel (α := α) (· < ·)]
   [DecidableRel (α := α) (· ≤ ·)]
   (x : α) : Set α → Set α × Set α :=

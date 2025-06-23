@@ -6,10 +6,9 @@ namespace Chapter1
 
 /- # Exercicio 1.1 -/
 
-def dropWhile (p : α → Bool) : (xs : List α) -> List α
+def dropWhile (p : α → Bool) : (xs : List α) → List α
 | [] => []
 | (x :: xs) => if p x then dropWhile p xs else x :: xs
-
 
 /- # Exercicio 1.2 -/
 

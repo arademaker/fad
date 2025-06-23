@@ -1,4 +1,3 @@
-
 import Fad.Chapter1
 import Fad.Chapter5
 import Fad.«Chapter1-Ex»
@@ -148,16 +147,18 @@ partial def qsort : List a → List a
 
 
 /- this function breaks with k > xs.length -/
-partial def select (k : Nat) (xs : List a) : a :=
+partial def select
+  (k : Nat) (xs : List a) (ok : k ≤ xs.length) : a :=
   match partition3 (pivot xs) xs with
   | (us, vs, ws) =>
     let m := us.length
     let n := vs.length
-    if          k ≤ m then select k us
-    else if k ≤ m + n then vs[k - m - 1]!
-    else if k > m + n then select (k - m - n) ws
+    if         h₁ : k ≤ m then select k us (by sorry)
+    else if h₂ : k ≤ m + n then vs[k - m - 1]'(by sorry)
+    else if k > m + n then select (k - m - n) ws (by sorry)
     else panic! "unreachable code"
 
+/- to be rewritten -/
 theorem partition3_length {a : Type} [LT a] [DecidableRel (α := a) (· < ·)]
  [DecidableRel (α := a) (· = ·)]
  (y :a) (xs : List a) :
@@ -165,7 +166,6 @@ theorem partition3_length {a : Type} [LT a] [DecidableRel (α := a) (· < ·)]
   (partition3 y xs).2.1.length +
   (partition3 y xs).1.length =
   xs.length := by
-
   induction xs with
   | nil => simp [partition3]
   | cons x xs ih =>
@@ -214,7 +214,7 @@ theorem partition3_length {a : Type} [LT a] [DecidableRel (α := a) (· < ·)]
     rw [← add_assoc]
     rw [ih]
 
---Criei uma outra função select pois precisei alterar um pouco da estrutura dela
+/- may not be necessary -/
 partial def select' (k : Nat) (xs : List a) (q: k ≤ xs.length): a :=
   let us := (partition3 (pivot xs) xs).1
   let vs := (partition3 (pivot xs) xs).2.1

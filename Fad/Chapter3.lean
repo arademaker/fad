@@ -295,7 +295,6 @@ theorem length_tail_lt_length (sl : SymList a) (h : sl ≠ nil)
  : lengthSL sl > lengthSL (tailSL sl) := by
   have ⟨lsl, rsl, ok⟩ := sl
   unfold lengthSL tailSL
-  simp
   sorry
 
 theorem headSL_none_iff_nilSL {sl : SymList a} : headSL sl = none ↔ sl = nil := by
