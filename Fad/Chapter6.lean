@@ -158,5 +158,74 @@ partial def select (k : Nat) (xs : List a) : a :=
     else if k > m + n then select (k - m - n) ws
     else panic! "unreachable code"
 
+theorem partition3_length {a : Type} [LT a] [DecidableRel (α := a) (· < ·)]
+ [DecidableRel (α := a) (· = ·)]
+ (y :a) (xs : List a) :
+  (partition3 y xs).2.2.length +
+  (partition3 y xs).2.1.length +
+  (partition3 y xs).1.length =
+  xs.length := by
+
+  induction xs with
+  | nil => simp [partition3]
+  | cons x xs ih =>
+    simp [partition3]
+    by_cases k: x < y
+    · simp at *
+      repeat rw [← partition3]
+      simp [k]
+      rw [← ih]
+      rfl
+    by_cases l: x > y
+    · simp at *
+      repeat rw [← partition3]
+      repeat simp [k, l]
+      rw [← ih]
+      by_cases m: x = y
+      · simp [m]
+        rw [← add_assoc]
+        rw[add_assoc]
+        nth_rewrite 3 [add_comm]
+        rfl
+      simp [k, l, m]
+      nth_rewrite 2 [add_assoc]
+      nth_rewrite 3 [add_comm]
+      rw [← add_assoc]
+      rw[add_assoc]
+      nth_rewrite 3 [add_comm]
+      rw [← add_assoc]
+    by_cases m: x = y
+    · simp [k, l]
+      simp at *
+      simp [m]
+      repeat rw [← partition3]
+      rw [← add_assoc]
+      rw[add_assoc]
+      nth_rewrite 3 [add_comm]
+      rw [← add_assoc]
+      rw [ih]
+    simp [k, l, m]
+    repeat rw [← partition3]
+    nth_rewrite 2 [add_assoc]
+    nth_rewrite 3 [add_comm]
+    rw [← add_assoc]
+    rw[add_assoc]
+    nth_rewrite 3 [add_comm]
+    rw [← add_assoc]
+    rw [ih]
+
+--Criei uma outra função select pois precisei alterar um pouco da estrutura dela
+partial def select' (k : Nat) (xs : List a) (q: k ≤ xs.length): a :=
+  let us := (partition3 (pivot xs) xs).1
+  let vs := (partition3 (pivot xs) xs).2.1
+  let ws := (partition3 (pivot xs) xs).2.2
+  let m := us.length
+  let n := vs.length
+  if      h₁:  k ≤ m     then select' k us  (by omega)
+  else if h₂:  k ≤ m + n then vs[k - m - 1]
+  else                        select' (k-m-n) ws (by
+    simp
+    rw [partition3_length]
+    simp [q])
 
 end Chapter6
