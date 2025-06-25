@@ -15,8 +15,9 @@ open Chapter4.BST2 (partition3)
 
 variable {a : Type}
   [Inhabited a] [DecidableRel (α := a) (· = ·)]
+  [Max a] [Min a]
   [LT a] [DecidableRel (α := a) (· < ·)]
-  [LE a] [DecidableRel (α := a) (· ≤ ·)] [Max a] [Min a]
+  [LE a] [DecidableRel (α := a) (· ≤ ·)]
 
 
 def foldr1₀ (f : a → a → a) (xs : List a) (h : xs ≠ []) : a
@@ -215,7 +216,8 @@ theorem partition3_length {a : Type} [LT a] [DecidableRel (α := a) (· < ·)]
     rw [ih]
 
 /- may not be necessary -/
-partial def select' (k : Nat) (xs : List a) (q: k ≤ xs.length): a :=
+partial def select' (k : Nat) (xs : List a)
+  (q: k ≤ xs.length): a :=
   let us := (partition3 (pivot xs) xs).1
   let vs := (partition3 (pivot xs) xs).2.1
   let ws := (partition3 (pivot xs) xs).2.2
@@ -227,5 +229,6 @@ partial def select' (k : Nat) (xs : List a) (q: k ≤ xs.length): a :=
     simp
     rw [partition3_length]
     simp [q])
+
 
 end Chapter6
