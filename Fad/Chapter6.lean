@@ -15,8 +15,9 @@ open Chapter4.BST2 (partition3)
 
 variable {a : Type}
   [Inhabited a] [DecidableRel (α := a) (· = ·)]
+  [Max a] [Min a]
   [LT a] [DecidableRel (α := a) (· < ·)]
-  [LE a] [DecidableRel (α := a) (· ≤ ·)] [Max a] [Min a]
+  [LE a] [DecidableRel (α := a) (· ≤ ·)]
 
 
 def foldr1₀ (f : a → a → a) (xs : List a) (h : xs ≠ []) : a
@@ -217,22 +218,19 @@ theorem partition3_length {a : Type} [LT a] [DecidableRel (α := a) (· < ·)]
 /- may not be necessary -/
 def select' (k : Nat) (xs : List a) (q: k ≤ xs.length): a := 
   let rec help (k : Nat) (xs : List a) (q: k ≤ xs.length) (fuel: Nat) : a :=
-    match fuel with
-  | 0 => panic!"Never here"
-  | fuel+1 =>
-    let us := (partition3 (pivot xs) xs).1
-    let vs := (partition3 (pivot xs) xs).2.1
-    let ws := (partition3 (pivot xs) xs).2.2
-    let m := us.length
-    let n := vs.length
-
-    if      h₁:  k ≤ m     then   help k us (by omega) fuel
-    else if h₂:  k ≤ m + n then vs[k - m - 1]
-    else                        help (k-m-n) ws (by
-    simp [m, n]; rw [partition3_length]; simp [q]) fuel
-    
-    termination_by fuel
-
+   match fuel with
+   | 0 => panic!"Never here"
+   | fuel+1 =>
+     let us := (partition3 (pivot xs) xs).1
+     let vs := (partition3 (pivot xs) xs).2.1
+     let ws := (partition3 (pivot xs) xs).2.2
+     let m := us.length
+     let n := vs.length
+     if      h₁:  k ≤ m     then   help k us (by omega) fuel
+     else if h₂:  k ≤ m + n then vs[k - m - 1]
+     else                        help (k-m-n) ws (by
+     simp [m, n]; rw [partition3_length]; simp [q]) fuel    
+  termination_by fuel 
   help k xs q xs.length
-
+  
 end Chapter6

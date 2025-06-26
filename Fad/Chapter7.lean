@@ -23,22 +23,23 @@ def foldr1₀ {a : Type} (f : a → a → a) (as : NonEmptyList a) : a :=
       omega)))
  termination_by as.val.length
 
--- #eval foldr1₀ (fun a b => a + b ) (Subtype.mk [1,2,3,4,5,6] (by simp))
 
-def foldr1₁ {a : Type} (f : a → a → a) (as : List a) (h : as.length > 0 := by decide) : a :=
+def foldr1₁ {a : Type} (f : a → a → a) (as : List a)
+  (h : as.length > 0 := by decide) : a :=
   let x := as.head (List.ne_nil_of_length_pos h)
   if h₂ : as.length = 1 then
     x
   else
     f x (foldr1₁ f as.tail (by rw [List.length_tail]; omega))
 
--- #eval foldr1₁ (fun a b => a + b ) [1,2,3]
 
 def foldr1 {a : Type} [Inhabited a] (f : a → a → a) : List a → a
   | []    => default
   | x::xs => xs.foldr f x
 
-example : foldr1 (fun a b => a + b ) [1,2,3] = 6 := by rfl
+-- #eval foldr1₀ (fun a b => a + b ) (Subtype.mk [1,2,3,4,5,6] (by simp))
+-- #eval foldr1₁ (fun a b => a + b ) [1,2,3,4,5,6]
+-- #eval foldr1  (fun a b => a + b ) [1,2,3,4,5,6]
 
 def minWith {a b : Type} [LE b] [Inhabited a] [DecidableRel (α := b) (· ≤ ·)]
   (f : a → b) (as : List a) : a :=
@@ -47,8 +48,10 @@ def minWith {a b : Type} [LE b] [Inhabited a] [DecidableRel (α := b) (· ≤ ·
 
 
 -- # Section 7.2 Greedy sorting algorithms
+section
 
 variable {a : Type} [Inhabited a]
+  [Ord a] [Min a]
   [LT a] [h₁ : DecidableRel (α := a) (· < ·)]
   [LE a] [h₂ : DecidableRel (α := a) (· ≤ ·)]
 
@@ -85,6 +88,10 @@ def sort : List a → List a :=
 def gstep (x : a) : List a → List a :=
   (minWith ic) ∘ extend x
 
+/-
+#eval gstep 6 [7,1,2,3]
+#eval gstep 6 [3,2,1,7]
+-/
 
 def picks (xs : List a) : List (a × List a) :=
   let rec helper : a → List (a × List a) → List (a × List a)
@@ -107,9 +114,40 @@ def pick (xs : List a) : (a × List a) :=
     aux p ps
 
 
--- # Section 7.3 Coin-changing
+instance : Min (a × List a) where
+  min p₁ p₂ :=
+    match compare p₁.1 p₂.1 with
+    | .lt => p₁
+    | .gt => p₂
+    | .eq =>
+      match compare p₁.snd p₂.snd with
+      | .lt => p₁
+      | _ => p₂
 
-namespace S73
+open Chapter6 (minimum) in
+def pick₁ (xs : List a) := minimum (picks xs)
+
+def sort₁ : List a → List a
+ | [] => []
+ | xs =>
+   let (x, ys) := pick₁ xs
+   x :: sort ys
+
+def sort₂ : List a → List a
+ | [] => []
+ | xs =>
+   let (x, ys) := pick xs
+   x :: sort ys
+
+/-
+#eval sort₁ [3,2,1,5,0]
+#eval sort₂ [3,2,1,5,0]
+-/
+
+end
+
+-- # Section 7.3 Coin-changing
+section
 
 abbrev Denom := Nat
 abbrev Tuple := List Nat
@@ -168,6 +206,6 @@ def mkchange : List Denom → Nat → Tuple
 #eval mkchange [7,3,1] 54
 -/
 
-end S73
+end
 
 end Chapter7

@@ -117,11 +117,11 @@ example (x : Nat) : ∀ xs, xs ≠ [] →
 
 /- # Exercicio 7.10  -/
 
-def pick₁ : List Nat → Option (Nat × List Nat)
+def pick₂ : List Nat → Option (Nat × List Nat)
 | []       => none
 | [x]      => some (x, [])
 | x :: xs  =>
-  match pick₁ xs with
+  match pick₂ xs with
   | none => none
   | some (y, ys) =>
     if x ≤ y then some (x, xs) else some (y, x :: ys)
