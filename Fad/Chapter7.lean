@@ -8,6 +8,12 @@ namespace Chapter7
 def NonEmptyList (α : Type) : Type :=
  {l : List α // l.length > 0}
 
+
+/-
+#eval let a : NonEmptyList Nat := Subtype.mk [1,2,3] (by decide)
+  a.val
+-/
+
 def foldr1₀ {a : Type} (f : a → a → a) (as : NonEmptyList a) : a :=
   let x := as.val.head (List.ne_nil_of_length_pos as.property)
   if h₂ : as.val.length = 1 then
@@ -24,6 +30,7 @@ def foldr1₀ {a : Type} (f : a → a → a) (as : NonEmptyList a) : a :=
  termination_by as.val.length
 
 
+
 def foldr1₁ {a : Type} (f : a → a → a) (as : List a)
   (h : as.length > 0 := by decide) : a :=
   let x := as.head (List.ne_nil_of_length_pos h)
@@ -37,18 +44,23 @@ def foldr1 {a : Type} [Inhabited a] (f : a → a → a) : List a → a
   | []    => default
   | x::xs => xs.foldr f x
 
+
 -- #eval foldr1₀ (fun a b => a + b ) (Subtype.mk [1,2,3,4,5,6] (by simp))
 -- #eval foldr1₁ (fun a b => a + b ) [1,2,3,4,5,6]
 -- #eval foldr1  (fun a b => a + b ) [1,2,3,4,5,6]
 
-def minWith {a b : Type} [LE b] [Inhabited a] [DecidableRel (α := b) (· ≤ ·)]
+def minWith {a b : Type} [LE b] [Inhabited a]
+  [DecidableRel (α := b) (· ≤ ·)]
   (f : a → b) (as : List a) : a :=
   let smaller f x y := cond (f x ≤ f y) x y
   foldr1 (smaller f) as
 
 
+
 -- # Section 7.2 Greedy sorting algorithms
 section
+
+#eval Chapter1.tails [1,2,3]
 
 variable {a : Type} [Inhabited a]
   [Ord a] [Min a]
@@ -57,13 +69,13 @@ variable {a : Type} [Inhabited a]
 
 open Chapter1 (tails concatMap)
 
-def pairs (xs : List a) : List (Prod a a) :=
- let step₁ : List a → List (Prod a a) → List (Prod a a)
-  | [], acc => acc
-  | x::ys, acc =>
-    let step₂ : List a → List (Prod a a) → List (Prod a a)
-     | [], acc => acc
-     | y::_, acc => (x, y) :: acc
+def pairs (xs : List a) : List (a × a) :=
+ let step₁ : List a → List (a × a) → List (a × a)
+  | []     , acc => acc
+  | x :: ys, acc =>
+    let step₂ : List a → List (a × a) → List (a × a)
+     | []    , acc => acc
+     | y :: _, acc => (x, y) :: acc
     (tails ys).foldr step₂ acc
  (tails xs).foldr step₁ []
 
@@ -73,8 +85,8 @@ def ic (xs : List a) : Nat :=
 
 
 def extend : a → List a → List (List a)
-| x, []      => [[x]]
-| x, (y::xs)  => (x :: y :: xs) :: (extend x xs).map (y:: ·)
+| x, []        => [[x]]
+| x, (y :: xs) => (x :: y :: xs) :: (extend x xs).map (y :: ·)
 
 
 def perms : List a → List (List a) :=
