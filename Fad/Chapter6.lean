@@ -216,19 +216,21 @@ theorem partition3_length {a : Type} [LT a] [DecidableRel (α := a) (· < ·)]
     rw [ih]
 
 /- may not be necessary -/
-partial def select' (k : Nat) (xs : List a)
-  (q: k ≤ xs.length): a :=
-  let us := (partition3 (pivot xs) xs).1
-  let vs := (partition3 (pivot xs) xs).2.1
-  let ws := (partition3 (pivot xs) xs).2.2
-  let m := us.length
-  let n := vs.length
-  if      h₁:  k ≤ m     then select' k us  (by omega)
-  else if h₂:  k ≤ m + n then vs[k - m - 1]
-  else                        select' (k-m-n) ws (by
-    simp
-    rw [partition3_length]
-    simp [q])
-
-
+def select' (k : Nat) (xs : List a) (q: k ≤ xs.length): a := 
+  let rec help (k : Nat) (xs : List a) (q: k ≤ xs.length) (fuel: Nat) : a :=
+   match fuel with
+   | 0 => panic!"Never here"
+   | fuel+1 =>
+     let us := (partition3 (pivot xs) xs).1
+     let vs := (partition3 (pivot xs) xs).2.1
+     let ws := (partition3 (pivot xs) xs).2.2
+     let m := us.length
+     let n := vs.length
+     if      h₁:  k ≤ m     then   help k us (by omega) fuel
+     else if h₂:  k ≤ m + n then vs[k - m - 1]
+     else                        help (k-m-n) ws (by
+     simp [m, n]; rw [partition3_length]; simp [q]) fuel    
+  termination_by fuel 
+  help k xs q xs.length
+  
 end Chapter6

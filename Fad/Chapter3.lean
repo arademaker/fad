@@ -295,7 +295,32 @@ theorem length_tail_lt_length (sl : SymList a) (h : sl ≠ nil)
  : lengthSL sl > lengthSL (tailSL sl) := by
   have ⟨lsl, rsl, ok⟩ := sl
   unfold lengthSL tailSL
-  sorry
+  simp
+  by_cases k: lsl.isEmpty = true
+  · simp [k, nil]
+    simp_all
+    cases ok with
+    | intro h1 h2 =>
+      simp [k] at h1
+      cases h1 with 
+      | inl l => simp_all; contradiction
+      | inr m => simp [m]
+  · simp [k]
+    simp_all
+    by_cases l: lsl.length = 1
+    · simp [l, splitInTwoSL, Nat.min_def]
+      by_cases q: (rsl.length + 1) / 2 ≤ rsl.length
+      · simp [q]
+      simp [q, instHSub]
+      omega
+    simp [l]
+    apply Nat.sub_lt_self
+    simp [k]
+    have h : 0 < lsl.length := by
+      cases lsl with
+      | nil => contradiction
+      | cons _ _ => simp
+    simp [Nat.succ_le_iff, h]
 
 theorem headSL_none_iff_nilSL {sl : SymList a} : headSL sl = none ↔ sl = nil := by
   apply Iff.intro <;> intro h
