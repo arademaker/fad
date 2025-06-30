@@ -52,6 +52,25 @@ def minsWith' {α β : Type} [Ord β] (f : α → β) (xs : List α) : List α :
     where tuple x := (f x, x)
 
 
+/- # Exercicio 7.3 -/
+
+example {a : Type} [Inhabited a]
+  (xs ys : List a) (f : a → a → a)
+  : xs ≠ [] ∧ ys ≠ [] → foldr1 f (xs ++ ys) = f (foldr1 f xs) (foldr1 f ys) := by
+  intro h
+  induction xs with
+  | nil =>
+    simp at h
+  | cons b bs ih =>
+    simp [foldr1]
+    have h₁ := h.right
+    match ys with
+    | [] => simp_all
+    | z :: zs =>
+      simp_all
+      sorry
+
+
 /- # Exercicio 7.4 -/
 
 def interleave {α : Type} : List α → List α → List (List α)

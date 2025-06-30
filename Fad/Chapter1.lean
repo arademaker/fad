@@ -274,6 +274,20 @@ def picks {a : Type} : List a → List (a × List a)
 | x :: xs =>
   (x, xs) :: ((picks xs).map (λ p => (p.1, x :: p.2)))
 
+theorem picks_length {a : Type} (xs : List a)
+  (ps : List (a × List a))
+  : ps = picks xs → ps.all (λ p => p.2.length < xs.length) := by
+  simp
+  intro h x ys h1
+  induction xs with
+  | nil => rw [picks.eq_def] at h ; simp_all
+  | cons b bs ih =>
+    rw [picks] at h
+    simp [List.length]
+    rw [h] at ih
+    rw [← picks] at ih
+    sorry
+
 -- #eval picks [1,2,3,4]
 
 partial def perm₂ {a : Type} : List a → List (List a)
