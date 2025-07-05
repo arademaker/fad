@@ -297,4 +297,12 @@ def huffman : List Elem → S1.Tree Elem :=
 -- #eval huffman [('a', 2), ('b', 3), ('c', 1), ('d', 20)]
 
 end S2
+
+
+namespace PQ
+
+
+
+end PQ
+
 end Chapter8
