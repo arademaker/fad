@@ -4,9 +4,9 @@
 
 ## Introduction
 
-This Lean adaptation of [Algorithm Design with Haskell](https://www.cs.ox.ac.uk/publications/books/adwh/) reinterprets five essential principles of algorithm design—divide and conquer, greedy algorithms, thinning, dynamic programming, and exhaustive search—within a dependently typed setting. All examples are reimplemented in Lean, a functional language and proof assistant based on dependent type theory. More than a translation, this version makes explicit the informal equational reasoning of the original by turning it into fully formal, machine-checked proofs.
+This [Lean](https://lean-lang.org/) adaptation of [Algorithm Design with Haskell](https://www.cs.ox.ac.uk/publications/books/adwh/) reinterprets five essential principles of algorithm design—divide and conquer, greedy algorithms, thinning, dynamic programming, and exhaustive search—within a dependently typed setting. All examples are reimplemented in Lean, a functional language and proof assistant based on dependent type theory. More than a translation, this version makes explicit the informal equational reasoning of the original by turning it into fully formal, machine-checked proofs.
 
-The main teaching goals of this adaptation are:
+The main goals of this adaptation are:
 
 - to demonstrate the expressive power of dependent types in representing and reasoning about algorithms,
 - to show how informal proofs can be systematically formalized,
