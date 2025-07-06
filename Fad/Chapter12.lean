@@ -3,6 +3,8 @@ import Fad.Chapter1
 namespace Chapter12
 open Chapter1 (concatMap)
 
+-- # Section12.1 Ways of generating partitions
+section
 abbrev Segment (a : Type) := List a
 abbrev Partition (a : Type) := List (Segment a)
 
@@ -54,7 +56,11 @@ def extendr (x : a) : Partition a → List (Partition a)
 
 def parts₂ : List Nat → List (Partition Nat) :=
   List.foldl (flip (concatMap ∘ extendr)) [[]]
+end
 
+-- # Section 12.3 The paragraph problem
+section
 
+end
 
 end Chapter12
