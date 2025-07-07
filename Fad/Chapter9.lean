@@ -1,6 +1,43 @@
 import Lean.Data
+import Fad.Chapter1
+import Fad.«Chapter1-Ex»
 
 namespace Chapter9
+
+def picks {a : Type} : List a → List (a × List a)
+| []      => []
+| x :: xs =>
+  (x, xs) :: ((picks xs).map (λ p => (p.1, x :: p.2)))
+
+def wrap {α : Type} (a : α) : List α := [a]
+
+partial def until' (p: a → Bool) (f: a → a) (x : a) : a :=
+  if p x then x
+  else until' p f (f x)
+
+def foldr1 {a : Type} [Inhabited a] (f : a → a → a) : List a → a
+  | []    => default
+  | x::xs => xs.foldr f x
+
+def minWith {a b : Type} [LE b] [Inhabited a]
+  [DecidableRel (α := b) (· ≤ ·)]
+  (f : a → b) (as : List a) : a :=
+  let smaller f x y := cond (f x ≤ f y) x y
+  foldr1 (smaller f) as
+
+
+#eval foldr1  (fun a b => a + b ) [1,2,3,4,5,6]
+
+def qsort₂ [Ord a] (f : a → a → Ordering) : List a → List a
+  | []        => []
+  | (x :: xs) =>
+    let p := xs.partition (λ z => f z x = Ordering.lt)
+    (qsort₂ f p.1) ++ [x] ++ (qsort₂ f p.2)
+ termination_by xs => xs.length
+ decreasing_by
+  all_goals simp
+   [List.partition_eq_filter_filter,
+    List.length_filter_le, Nat.lt_add_one_of_le]
 
 /- 9.1 Graphs and spanning trees -/
 
@@ -17,4 +54,49 @@ def weight (e : Edge) : Weight := e.2.2
 
 abbrev AdjArray := Lean.AssocList Vertex (List (Vertex × Weight))
 
+abbrev Tree   := Graph
+abbrev Forest := List Tree
+
+def cost (t : Tree) : Int :=
+  (edges t).map weight |>.sum
+
+/- 9.2 Kruskal’s algorithm -/
+
+abbrev State  := Forest × List Edge
+
+def extract (s : State) : Tree :=
+  s.1.head!
+
+def done (s : State) : Bool :=
+  s.1.length = 1
+
+def start (g : Graph) : State :=
+  (nodes g |>.map (fun v => ([v], [])), edges g)
+
+def find (ts : Forest) (v : Vertex) : Tree :=
+  (ts.find? (fun t => (nodes t).contains v)).get!
+
+def safeEdge (e : Edge) (ts : Forest) : Bool :=
+  find ts (souce e) ≠ find ts (target e)
+
+def add (e : Edge) (ts : Forest) : Forest :=
+  let t1 := find ts (souce e)
+  let t2 := find ts (target e)
+  let rest := ts.filter (fun t => t ≠ t1 ∧ t ≠ t2)
+  ((t1.1 ++ t2.1), e :: (t1.2 ++ t2.2)) :: rest
+
+def steps : State → List State
+| (ts, es) =>
+  picks es
+  |>.filterMap (fun (e, es') =>
+    if safeEdge e ts then
+      some (add e ts, es')
+    else
+      none)
+
+def spats (g : Graph) : List Tree :=
+  (until' (fun ss => ss.all done) (fun ss => List.flatMap steps ss)) [start g]
+  |>.map extract
+
 end Chapter9
+
