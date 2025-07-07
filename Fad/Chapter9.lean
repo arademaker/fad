@@ -95,7 +95,7 @@ def steps : State → List State
       none)
 
 def spats (g : Graph) : List Tree :=
-  (until' (fun ss => ss.all done) (fun ss => List.flatMap steps ss)) [start g]
+  (until' (fun ss => ss.all done) (fun ss => List.flatMap steps ss)) (wrap (start g))
   |>.map extract
 
 end Chapter9
