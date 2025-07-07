@@ -62,7 +62,8 @@ def spats (g : Graph) : List Tree :=
   let rec helper (ss : List State) (fuel: Nat): List Tree :=
     match fuel with
       | 0        => panic! "Never here"
-      | fuel + 1 => cond (ss.all done) (ss.map Prod.fst) (helper (concatMap steps ss) fuel) termination_by fuel
+      | fuel + 1 => cond (ss.all done) (ss.map Prod.fst) (helper (concatMap steps ss) fuel)
+        termination_by fuel
 
   helper [start] g.1.length
 
@@ -78,5 +79,24 @@ def gstep : State → State
       (t', e :: es')
 
     cond (safeEdge e t) (add e t, es) (keep e (gstep (t, es)))
+
+def prim (g : Graph) : Tree :=
+  let start : State :=
+    match nodes g with
+    | []     => (([], []), [])
+    | v :: _ => (([v], []), edges g)
+
+  let done : State → Bool :=
+    fun (t, _) => (nodes t).length == (nodes g).length
+
+  let rec helper (s : State) (fuel : Nat) : State :=
+    match fuel with
+    | 0        => panic! "Never Here"
+    | fuel + 1 => cond (done s) s (helper (gstep s) fuel)
+    termination_by fuel
+
+  (helper start g.1.length).1
+
+--#eval prim ([1,2,3,4],[(1, 2, 1), (1, 3, 2), (2, 3, 5), (3,4,20), (3,4,50)])
 
 end Chapter9
