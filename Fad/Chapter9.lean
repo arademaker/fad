@@ -1,6 +1,10 @@
 import Lean.Data
+import Fad.Chapter7
+import Fad.Chapter1
 
 namespace Chapter9
+
+
 
 /- 9.1 Graphs and spanning trees -/
 
@@ -20,6 +24,9 @@ abbrev AdjArray := Lean.AssocList Vertex (List (Vertex × Weight))
 
 
 /- 9.4 Prim’s algorithm -/
+
+open Chapter7 (minWith picks)
+open Chapter1 (concatMap)
 
 abbrev State := (Tree × List Edge)
 
