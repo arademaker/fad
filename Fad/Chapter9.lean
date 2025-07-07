@@ -15,7 +15,7 @@ abbrev Graph  := (List Vertex × List Edge)
 
 def nodes (g : Graph) : List Vertex := g.1
 def edges (g : Graph) : List Edge := g.2
-def souce  (e : Edge) : Vertex := e.1
+def source  (e : Edge) : Vertex := e.1
 def target (e : Edge) : Vertex := e.2.1
 def weight (e : Edge) : Weight := e.2.2
 
@@ -38,7 +38,6 @@ abbrev State := (Tree × List Edge)
 
 def add (e: Edge) (t: Tree) : Tree :=
   let (vs, es) := t
-
   cond (vs.contains (source e)) (target e :: vs, e :: es) (source e :: vs, e::es)
 
 
@@ -74,7 +73,6 @@ def spats (g : Graph) : List Tree :=
 def gstep : State → State
   | (t, [])      => (t, [])
   | (t, e :: es) =>
-
     let keep (e: Edge) (s: State) : State :=
       let (t', es') := s
       (t', e :: es')
