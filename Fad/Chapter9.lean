@@ -98,5 +98,21 @@ def spats (g : Graph) : List Tree :=
   (until' (fun ss => ss.all done) (fun ss => List.flatMap steps ss)) (wrap (start g))
   |>.map extract
 
+def MCC (g : Graph) : Tree :=
+  minWith cost (spats g)
+
+def gstep (s : State) : State :=
+  match s with
+  | (_, []) => s
+  | (ts, e :: es) =>
+    let t1 := find ts (souce e)
+    let t2 := find ts (target e)
+    let rest := ts.filter (fun t => t ≠ t1 ∧ t ≠ t2)
+    let ts' := ((t1.1 ++ t2.1), e :: (t1.2 ++ t2.2)) :: rest
+    if t1 ≠ t2 then
+      (ts', es)
+    else
+      gstep (ts, es)
+
 end Chapter9
 
