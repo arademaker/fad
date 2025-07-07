@@ -21,6 +21,12 @@ def weight (e : Edge) : Weight := e.2.2
 
 abbrev AdjArray := Lean.AssocList Vertex (List (Vertex × Weight))
 
+abbrev Tree   := Graph
+abbrev Forest := List Tree
+
+def cost (t : Tree) : Int :=
+  (edges t).map weight |>.sum
+
 
 
 /- 9.4 Prim’s algorithm -/
