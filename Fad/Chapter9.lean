@@ -1,29 +1,10 @@
 import Lean.Data
 import Fad.Chapter1
 import Fad.«Chapter1-Ex»
+import Fad.Chapter7
 
 namespace Chapter9
-
-def picks {a : Type} : List a → List (a × List a) -- 1 ou 7
-| []      => []
-| x :: xs =>
-  (x, xs) :: ((picks xs).map (λ p => (p.1, x :: p.2)))
-
-def wrap {α : Type} (a : α) : List α := [a] -- 1-Ex
-
-partial def until' (p: a → Bool) (f: a → a) (x : a) : a := -- 1
-  if p x then x
-  else until' p f (f x)
-
-def foldr1 {a : Type} [Inhabited a] (f : a → a → a) : List a → a -- 7
-  | []    => default
-  | x::xs => xs.foldr f x
-
-def minWith {a b : Type} [LE b] [Inhabited a] -- 7
-  [DecidableRel (α := b) (· ≤ ·)]
-  (f : a → b) (as : List a) : a :=
-  let smaller f x y := cond (f x ≤ f y) x y
-  foldr1 (smaller f) as
+open Chapter1 (wrap)
 
 /- 9.1 Graphs and spanning trees -/
 
@@ -73,7 +54,7 @@ def add (e : Edge) (ts : Forest) : Forest :=
 
 def steps : State → List State
 | (ts, es) =>
-  picks es
+  Chapter7.picks es
   |>.filterMap (fun (e, es') =>
     if safeEdge e ts then
       some (add e ts, es')
@@ -81,11 +62,11 @@ def steps : State → List State
       none)
 
 def spats (g : Graph) : List Tree :=
-  (until' (fun ss => ss.all done) (fun ss => List.flatMap steps ss)) (wrap (start g))
+  (Chapter1.until' (fun ss => ss.all done) (fun ss => List.flatMap steps ss)) (wrap (start g))
   |>.map extract
 
 def MCC (g : Graph) : Tree :=
-  minWith cost (spats g)
+ Chapter7.minWith cost (spats g)
 
 def gstep (s : State) : State :=
   match s with
@@ -101,4 +82,3 @@ def gstep (s : State) : State :=
       gstep (ts, es)
 
 end Chapter9
-
