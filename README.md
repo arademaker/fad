@@ -85,7 +85,7 @@ Along the way, readers gain experience not only in algorithm design, but also in
 
     - [x] 8.1 Minimum‑height trees
     - [x] 8.2 Huffman coding trees
-    - [ ] 8.3 Priority queues
+    - [x] 8.3 Priority queues
     - [ ] Exercises
 
 3.  Greedy algorithms on graphs
