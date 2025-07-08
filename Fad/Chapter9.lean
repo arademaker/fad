@@ -32,13 +32,12 @@ def cost (t : Tree) : Int :=
 /- 9.4 Prim’s algorithm -/
 
 open Chapter7 (minWith picks)
-open Chapter1 (concatMap)
+open Chapter1 (concatMap apply)
 
 abbrev StatePrim := (Tree × List Edge)
 
 def addPrim (e: Edge) (t: Tree) : Tree :=
   let (vs, es) := t
-
   cond (vs.contains (source e)) (target e :: vs, e :: es) (source e :: vs, e::es)
 
 
@@ -77,11 +76,9 @@ def mcstPrim : Graph → Tree :=
 def gstepPrim : StatePrim → StatePrim
   | (t, [])      => (t, [])
   | (t, e :: es) =>
-
     let keep (e: Edge) (s: StatePrim) : StatePrim :=
       let (t', es') := s
       (t', e :: es')
-
     cond (safeEdgePrim e t) (addPrim e t, es) (keep e (gstepPrim (t, es)))
 
 
@@ -103,6 +100,19 @@ def prim (g : Graph) : Tree :=
 
   (helper start g.1.length).1
 
+def prim' (g : Graph) : Tree :=
+  let start : StatePrim :=
+    match nodes g with
+    | []     => (([], []), [])
+    | v :: _ => (([v], []), edges g)
+
+  let n := (nodes g).length
+
+(apply (n-1) gstepPrim (start)).1
+
 --#eval prim ([1,2,3,4],[(1, 2, 1), (1, 3, 2), (2, 3, 5), (3,4,20), (3,4,50)])
+--#eval prim' ([1,2,3,4],[(1, 2, 1), (1, 3, 2), (2, 3, 5), (3,4,20), (3,4,50)])
+
+
 
 end Chapter9
