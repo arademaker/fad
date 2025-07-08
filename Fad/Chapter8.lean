@@ -298,8 +298,7 @@ def huffman : List Elem → S1.Tree Elem :=
 
 end S2
 
-namespace S3
-
+section PriorityQueue
 -- β precisa ser ordenável para sabermos determinar a prioridade
 variable {α β : Type} [LE β] [DecidableRel (α := β) (· ≤ ·)]
 
@@ -470,7 +469,6 @@ def pqCombined : PQ Nat Nat := combineQ pq1 pq2
 #eval huffmanPQ [('z', 5)]
 #eval huffmanPQ []
 -/
-
-end S3
+end
 
 end Chapter8
