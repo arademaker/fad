@@ -298,7 +298,7 @@ def huffman : List Elem → S1.Tree Elem :=
 
 end S2
 
-section PriorityQueue
+namespace PriorityQueue
 -- β precisa ser ordenável para sabermos determinar a prioridade
 variable {α β : Type} [LE β] [DecidableRel (α := β) (· ≤ ·)]
 
