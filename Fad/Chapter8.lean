@@ -469,6 +469,7 @@ def pqCombined : PQ Nat Nat := combineQ pq1 pq2
 #eval huffmanPQ [('z', 5)]
 #eval huffmanPQ []
 -/
-end
+
+end PriorityQueue
 
 end Chapter8
