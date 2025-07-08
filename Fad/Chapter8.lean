@@ -412,24 +412,29 @@ def pqInsert1 : PQ Nat Nat := insertQ 5 3 emptyQ
 def pqInsert2 : PQ Nat Nat := insertQ 2 1 pqInsert1
 def pqInsert3 : PQ Nat Nat := insertQ 8 4 pqInsert2
 
+/-
 #eval toListQ pqInsert1  -- [(5, 3)]
 #eval toListQ pqInsert2  -- [(2, 1), (5, 3)]
 #eval toListQ pqInsert3  -- [(2, 1), (5, 3), (8, 4)]
+-/
 
--- ===== EXEMPLOS PARA deleteQ? =====
+/-
 #eval deleteQ? pqInsert3  -- some ((2, 1), remaining queue)
 #eval deleteQ? (emptyQ : PQ Nat Nat)     -- none (fila vazia)
+-/
 
--- Testando múltiplas deleções
 def pqAfterDelete1 := match deleteQ? pqInsert3 with | some (_, q) => q | none => emptyQ
 def pqAfterDelete2 := match deleteQ? pqAfterDelete1 with | some (_, q) => q | none => emptyQ
 
+/-
 #eval toListQ pqAfterDelete1
 #eval toListQ pqAfterDelete2
+-/
 
 def pqMake1 : PQ Nat Nat := makeQ [(5, 3), (2, 1), (8, 4)]
 def pqMake2 : PQ String Nat := makeQ [("baixa", 5), ("urgente", 1), ("normal", 3)]
 
+/-
 #eval toListQ pqMake1
 #eval toListQ pqMake2
 
@@ -440,18 +445,22 @@ def pqMake2 : PQ String Nat := makeQ [("baixa", 5), ("urgente", 1), ("normal", 3
 #eval extract (emptyQ : PQ Nat Nat)
 #eval extract pqInsert1
 #eval extract pqInsert2
+-/
 
 def initialQueue : PQ Nat Nat := insertQ 10 5 emptyQ
 def elementsToAdd : List (Nat × Nat) := [(3, 1), (7, 4), (2, 2), (9, 6)]
 def finalQueue : PQ Nat Nat := addListQ elementsToAdd initialQueue
 
+/-
 #eval toListQ initialQueue
 #eval toListQ finalQueue
+-/
 
 def pq1 : PQ Nat Nat := makeQ [(2, 1), (5, 3)]
 def pq2 : PQ Nat Nat := makeQ [(1, 0), (8, 4)]
 def pqCombined : PQ Nat Nat := combineQ pq1 pq2
 
+/-
 #eval toListQ pq1
 #eval toListQ pq2
 #eval toListQ pqCombined
@@ -460,6 +469,7 @@ def pqCombined : PQ Nat Nat := combineQ pq1 pq2
 #eval huffmanPQ [('x', 1), ('y', 1)]
 #eval huffmanPQ [('z', 5)]
 #eval huffmanPQ []
+-/
 
 end S3
 
