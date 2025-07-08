@@ -1,10 +1,12 @@
 import Lean.Data
 import Fad.Chapter1
 import Fad.«Chapter1-Ex»
+import Fad.«Chapter5-Ex»
 import Fad.Chapter7
 
 namespace Chapter9
-open Chapter1 (wrap)
+open Chapter1 (wrap apply)
+open Chapter5 (sortOn₃)
 
 /- 9.1 Graphs and spanning trees -/
 
@@ -37,7 +39,7 @@ def extract (s : State) : Tree :=
 def done (s : State) : Bool :=
   s.1.length = 1
 
-def start (g : Graph) : State :=
+def start₀ (g : Graph) : State :=
   (nodes g |>.map (fun v => ([v], [])), edges g)
 
 def find (ts : Forest) (v : Vertex) : Tree :=
@@ -62,7 +64,7 @@ def steps : State → List State
       none)
 
 def spats (g : Graph) : List Tree :=
-  (Chapter1.until' (fun ss => ss.all done) (fun ss => List.flatMap steps ss)) (wrap (start g))
+  (Chapter1.until' (fun ss => ss.all done) (fun ss => List.flatMap steps ss)) (wrap (start₀ g))
   |>.map extract
 
 def MCC (g : Graph) : Tree :=
@@ -80,5 +82,15 @@ def gstep (s : State) : State :=
       (ts', es)
     else
       gstep (ts, es)
+
+def start₁ (g : Graph) : State :=
+  (nodes g |>.map (fun v => ([v], [])), sortOn₃ weight (edges g))
+
+def kruskal₁ (g : Graph) : Tree :=
+  Chapter1.until' done gstep (start₁ g) |> extract
+
+def kruskal₂ (g : Graph) : Tree :=
+  let n := (nodes g).length
+  extract (apply (n - 1) gstep (start₁ g))
 
 end Chapter9
