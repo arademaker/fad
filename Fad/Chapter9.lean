@@ -34,35 +34,36 @@ def cost (t : Tree) : Int :=
 open Chapter7 (minWith picks)
 open Chapter1 (concatMap)
 
-abbrev State := (Tree × List Edge)
+abbrev StatePrim := (Tree × List Edge)
 
-def add (e: Edge) (t: Tree) : Tree :=
+def addPrim (e: Edge) (t: Tree) : Tree :=
   let (vs, es) := t
+
   cond (vs.contains (source e)) (target e :: vs, e :: es) (source e :: vs, e::es)
 
 
-def safeEdge (e: Edge) (t: Tree) : Bool :=
+def safeEdgePrim (e: Edge) (t: Tree) : Bool :=
   (nodes t).contains (source e) ≠ (nodes t).contains (target e)
 
 
-def steps (s: State) : List State :=
+def stepsPrim (s: StatePrim) : List StatePrim :=
   let (t,es) := s
-  (picks es).filterMap fun (e, es') => cond (safeEdge e t) (some (add e t, es')) none
+  (picks es).filterMap fun (e, es') => cond (safeEdgePrim e t) (some (addPrim e t, es')) none
 
 
-def spats (g : Graph) : List Tree :=
-  let start : State :=
+def spatsPrim (g : Graph) : List Tree :=
+  let start : StatePrim :=
     match nodes g with
      | []     => (([], []), [])
      | v :: _ => (([v], []), edges g)
 
-  let done : State → Bool :=
+  let done : StatePrim → Bool :=
     fun (t, _) => (nodes t).length == (nodes g).length
 
-  let rec helper (ss : List State) (fuel: Nat): List Tree :=
+  let rec helper (ss : List StatePrim) (fuel: Nat): List Tree :=
     match fuel with
       | 0        => panic! "Never here"
-      | fuel + 1 => cond (ss.all done) (ss.map Prod.fst) (helper (concatMap steps ss) fuel)
+      | fuel + 1 => cond (ss.all done) (ss.map Prod.fst) (helper (concatMap stepsPrim ss) fuel)
         termination_by fuel
 
   helper [start] g.1.length
@@ -70,29 +71,34 @@ def spats (g : Graph) : List Tree :=
 
 --#eval spats ([1,2,3,4],[(1,2,1), (2,3,2), (3,4,5)])
 
+def mcstPrim : Graph → Tree :=
+  minWith cost ∘ spatsPrim
 
-def gstep : State → State
+def gstepPrim : StatePrim → StatePrim
   | (t, [])      => (t, [])
   | (t, e :: es) =>
-    let keep (e: Edge) (s: State) : State :=
+
+    let keep (e: Edge) (s: StatePrim) : StatePrim :=
       let (t', es') := s
       (t', e :: es')
 
-    cond (safeEdge e t) (add e t, es) (keep e (gstep (t, es)))
+    cond (safeEdgePrim e t) (addPrim e t, es) (keep e (gstepPrim (t, es)))
+
+
 
 def prim (g : Graph) : Tree :=
-  let start : State :=
+  let start : StatePrim :=
     match nodes g with
     | []     => (([], []), [])
     | v :: _ => (([v], []), edges g)
 
-  let done : State → Bool :=
+  let done : StatePrim → Bool :=
     fun (t, _) => (nodes t).length == (nodes g).length
 
-  let rec helper (s : State) (fuel : Nat) : State :=
+  let rec helper (s : StatePrim) (fuel : Nat) : StatePrim :=
     match fuel with
     | 0        => panic! "Never Here"
-    | fuel + 1 => cond (done s) s (helper (gstep s) fuel)
+    | fuel + 1 => cond (done s) s (helper (gstepPrim s) fuel)
     termination_by fuel
 
   (helper start g.1.length).1
