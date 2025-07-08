@@ -8,6 +8,8 @@ namespace Chapter9
 open Chapter1 (wrap apply)
 open Chapter5 (sortOn₃)
 
+namespace SpanningTrees
+
 /- 9.1 Graphs and spanning trees -/
 
 abbrev Vertex := Nat
@@ -28,6 +30,10 @@ abbrev Forest := List Tree
 
 def cost (t : Tree) : Int :=
   (edges t).map weight |>.sum
+
+end SpanningTrees
+
+open SpanningTrees
 
 /- 9.2 Kruskal’s algorithm -/
 
