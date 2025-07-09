@@ -1,12 +1,25 @@
 import Fad.Chapter1
+import Fad.Chapter7
+import Fad.Chapter8
 
 namespace Chapter12
 open Chapter1 (concatMap)
 
+/-!
+# Chapter Info
+
+In this chapter $ 2 ∈ 3$ we will confine ourselves to just two examples.
+The first is a simple **scheduling problem**, while the second involves **breaking paragraphs into lines**.
+-/
+
 -- # Section12.1 Ways of generating partitions
 section
+
+/-- A partition of a list of type [A] has type [[A]], so a list of partitions has type
+[[[A]]]. -/
 abbrev Segment (a : Type) := List a
 abbrev Partition (a : Type) := List (Segment a)
+
 
 def splits {a : Type} : List a → List (List a × List a)
  | [] => []
