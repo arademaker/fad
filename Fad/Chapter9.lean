@@ -31,40 +31,41 @@ def cost (t : Tree) : Int :=
 
 /- 9.4 Prim’s algorithm -/
 
+namespace primsalgorithm
+
 open Chapter7 (minWith picks)
 open Chapter1 (concatMap apply)
 
---Adicionei um Prim ao final dos elementos tratados nesse tópico, para evitar conflitos com outras funções que no livro são definidas pelo mesmo nome.
 
-abbrev StatePrim := (Tree × List Edge)
+abbrev State := (Tree × List Edge)
 
-def addPrim (e: Edge) (t: Tree) : Tree :=
+def add (e: Edge) (t: Tree) : Tree :=
   let (vs, es) := t
   cond (vs.contains (source e)) (target e :: vs, e :: es) (source e :: vs, e::es)
 
 
-def safeEdgePrim (e: Edge) (t: Tree) : Bool :=
+def safeEdge (e: Edge) (t: Tree) : Bool :=
   (nodes t).contains (source e) ≠ (nodes t).contains (target e)
 
 
-def stepsPrim (s: StatePrim) : List StatePrim :=
+def steps (s: State) : List State :=
   let (t,es) := s
-  (picks es).filterMap fun (e, es') => cond (safeEdgePrim e t) (some (addPrim e t, es')) none
+  (picks es).filterMap fun (e, es') => cond (safeEdge e t) (some (add e t, es')) none
 
 
-def spatsPrim (g : Graph) : List Tree :=
-  let start : StatePrim :=
+def spats (g : Graph) : List Tree :=
+  let start : State :=
     match nodes g with
      | []     => (([], []), [])
      | v :: _ => (([v], []), edges g)
 
-  let done : StatePrim → Bool :=
+  let done : State → Bool :=
     fun (t, _) => (nodes t).length == (nodes g).length
 
-  let rec helper (ss : List StatePrim) (fuel: Nat): List Tree :=
+  let rec helper (ss : List State) (fuel: Nat): List Tree :=
     match fuel with
       | 0        => panic! "Never here"
-      | fuel + 1 => cond (ss.all done) (ss.map Prod.fst) (helper (concatMap stepsPrim ss) fuel)
+      | fuel + 1 => cond (ss.all done) (ss.map Prod.fst) (helper (concatMap steps ss) fuel)
         termination_by fuel
 
   helper [start] g.1.length
@@ -72,56 +73,58 @@ def spatsPrim (g : Graph) : List Tree :=
 
 --#eval spats ([1,2,3,4],[(1,2,1), (2,3,2), (3,4,5)])
 
-def mcstPrim : Graph → Tree :=
-  minWith cost ∘ spatsPrim
+def mcst : Graph → Tree :=
+  minWith cost ∘ spats
 
-def gstepPrim : StatePrim → StatePrim
+def gstep : State → State
   | (t, [])      => (t, [])
   | (t, e :: es) =>
-    let keep (e: Edge) (s: StatePrim) : StatePrim :=
+    let keep (e: Edge) (s: State) : State :=
       let (t', es') := s
       (t', e :: es')
-    cond (safeEdgePrim e t) (addPrim e t, es) (keep e (gstepPrim (t, es)))
+    cond (safeEdge e t) (add e t, es) (keep e (gstep (t, es)))
 
 
 
 def prim (g : Graph) : Tree :=
-  let start : StatePrim :=
+  let start : State :=
     match nodes g with
     | []     => (([], []), [])
     | v :: _ => (([v], []), edges g)
 
-  let done : StatePrim → Bool :=
+  let done : State → Bool :=
     fun (t, _) => (nodes t).length == (nodes g).length
 
-  let rec helper (s : StatePrim) (fuel : Nat) : StatePrim :=
+  let rec helper (s : State) (fuel : Nat) : State :=
     match fuel with
     | 0        => panic! "Never Here"
-    | fuel + 1 => cond (done s) s (helper (gstepPrim s) fuel)
+    | fuel + 1 => cond (done s) s (helper (gstep s) fuel)
     termination_by fuel
 
   (helper start g.1.length).1
 
 def prim' (g : Graph) : Tree :=
-  let start : StatePrim :=
+  let start : State :=
     match nodes g with
     | []     => (([], []), [])
     | v :: _ => (([v], []), edges g)
   let n := (nodes g).length
-(apply (n-1) gstepPrim (start)).1
+(apply (n-1) gstep (start)).1
 
 --#eval prim ([1,2,3,4],[(1, 2, 1), (1, 3, 2), (2, 3, 5), (3,4,20), (3,4,50)])
 --#eval prim' ([1,2,3,4],[(1, 2, 1), (1, 3, 2), (2, 3, 5), (3,4,20), (3,4,50)])
 
 abbrev Links := Std.HashMap Vertex (Vertex × Weight)
-abbrev StatePrim' := Links × List Vertex
+abbrev State' := Links × List Vertex
 
-def parentPrim (ls : Links) (v : Vertex) : Vertex :=
+def parent (ls : Links) (v : Vertex) : Vertex :=
   (ls.get! v).1
 
-def weightPrim (ls: Links) (v : Vertex) : Weight :=
+def weight (ls: Links) (v : Vertex) : Weight :=
   (ls.get! v).2
 
 abbrev Weights := Std.HashMap (Vertex × Vertex) Weight
+
+end primsalgorithm
 
 end Chapter9
