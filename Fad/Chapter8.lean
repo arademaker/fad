@@ -297,4 +297,179 @@ def huffman : List Elem → S1.Tree Elem :=
 -- #eval huffman [('a', 2), ('b', 3), ('c', 1), ('d', 20)]
 
 end S2
+
+namespace PriorityQueue
+-- β precisa ser ordenável para sabermos determinar a prioridade
+variable {α β : Type} [LE β] [DecidableRel (α := β) (· ≤ ·)]
+
+abbrev Rank := Nat -- Chamando de rank para ficar parecido com o livro
+
+inductive PQ (α : Type) (β : Type) : Type where
+  | null : PQ α β
+  | fork : Rank → α → β → PQ α β → PQ α β → PQ α β
+  deriving Repr, Inhabited
+
+def mergeOnSnd : List (α × β) → List (α × β) → List (α × β)
+  | [], ys => ys
+  | xs, [] => xs
+  | (x, p) :: xs, (y, q) :: ys =>
+    if p ≤ q then
+      (x, p) :: mergeOnSnd xs ((y, q) :: ys)
+    else
+      (y, q) :: mergeOnSnd ((x, p) :: xs) ys
+
+def toListQ : PQ α β → List (α × β)
+  | .null => []
+  | .fork _ x p t₁ t₂ =>
+    (x, p) :: mergeOnSnd (toListQ t₁) (toListQ t₂)
+
+def rank : PQ α β → Rank
+  | .null => 0
+  | .fork r _ _ _ _ => r
+
+def fork (x : α) (p : β) (t₁ t₂ : PQ α β) : PQ α β :=
+  let r₁ := rank t₁
+  let r₂ := rank t₂
+  if r₂ ≤ r₁ then
+    .fork (r₂ + 1) x p t₁ t₂
+  else
+    .fork (r₁ + 1) x p t₂ t₁
+
+def combineQ : PQ α β → PQ α β → PQ α β
+  | .null, t => t
+  | t, .null => t
+  | .fork k₁ x₁ p₁ l₁ r₁, .fork k₂ x₂ p₂ l₂ r₂ =>
+    if p₁ ≤ p₂ then
+      fork x₁ p₁ l₁ (combineQ r₁ (.fork k₂ x₂ p₂ l₂ r₂))
+    else
+      fork x₂ p₂ l₂ (combineQ (.fork k₁ x₁ p₁ l₁ r₁) r₂)
+
+def insertQ (x : α) (p : β) (t : PQ α β) : PQ α β :=
+  combineQ (fork x p .null .null) t
+
+
+def deleteQ (q : PQ α β) (h : q ≠ PQ.null) : (α × β) × PQ α β :=
+  match q with
+  | .null => by contradiction
+  | .fork _ x p t₁ t₂ => ((x, p), combineQ t₁ t₂)
+
+/-
+Tive que usar essa versão de deleteQ no algoritmo de Huffman,
+pois não consegui fazer a prova de que o gstep recebe uma fila não nula.
+-/
+def deleteQ? (q : PQ α β) : Option ((α × β) × PQ α β) :=
+  match q with
+  | .null => none
+  | .fork _ x p t₁ t₂ => some (((x, p), combineQ t₁ t₂))
+
+/- Funções necessárias para o algoritmo de Huffman -/
+def emptyQ : PQ α β := .null
+
+def nullQ : PQ α β → Bool
+  | .null => true
+  | _ => false
+
+def addListQ (xs : List (α × β)) (q : PQ α β) : PQ α β :=
+  xs.foldl (λ acc (x, p) => insertQ x p acc) q
+
+def makeQ (xs : List (α × β)) : PQ α β :=
+  addListQ xs emptyQ
+
+def singleQ (q : PQ α β) : Bool :=
+  match deleteQ? q with
+  | none => true
+  | some (_, remaining) => nullQ remaining
+
+def leaf (x : α) (p : β) : PQ α β :=
+  fork x p .null .null
+
+def extract (q : PQ α β) : Option α :=
+  match deleteQ? q with
+  | none => none
+  | some ((x, _), _) => some x
+
+def node : (S1.Tree S2.Elem × S2.Weight) → (S1.Tree S2.Elem × S2.Weight) → (S1.Tree S2.Elem × S2.Weight)
+  | (t₁, w₁), (t₂, w₂) => (S1.Tree.node t₁ t₂, w₁ + w₂)
+
+def gstep (ps : PQ (S1.Tree S2.Elem) S2.Weight) : PQ (S1.Tree S2.Elem) S2.Weight :=
+  match deleteQ? ps with
+  | none => .null
+  | some (p₁, qs) =>
+    match deleteQ? qs with
+    | none => .null
+    | some (p₂, rs) =>
+      let (t, w) := node p₁ p₂
+      insertQ t w rs
+
+/- O algoritmo de Huffman usando priority queues -/
+def huffmanPQ (es : List S2.Elem) : Option (S1.Tree S2.Elem) :=
+  let q := makeQ (es.map S2.leaf)
+  extract (Chapter1.until' singleQ gstep q)
+
+/- Exemplos -/
+def pqInsert1 : PQ Nat Nat := insertQ 5 3 emptyQ
+def pqInsert2 : PQ Nat Nat := insertQ 2 1 pqInsert1
+def pqInsert3 : PQ Nat Nat := insertQ 8 4 pqInsert2
+
+/-
+#eval toListQ pqInsert1  -- [(5, 3)]
+#eval toListQ pqInsert2  -- [(2, 1), (5, 3)]
+#eval toListQ pqInsert3  -- [(2, 1), (5, 3), (8, 4)]
+-/
+
+/-
+#eval deleteQ? pqInsert3  -- some ((2, 1), remaining queue)
+#eval deleteQ? (emptyQ : PQ Nat Nat)     -- none (fila vazia)
+-/
+
+def pqAfterDelete1 := match deleteQ? pqInsert3 with | some (_, q) => q | none => emptyQ
+def pqAfterDelete2 := match deleteQ? pqAfterDelete1 with | some (_, q) => q | none => emptyQ
+
+/-
+#eval toListQ pqAfterDelete1
+#eval toListQ pqAfterDelete2
+-/
+
+def pqMake1 : PQ Nat Nat := makeQ [(5, 3), (2, 1), (8, 4)]
+def pqMake2 : PQ String Nat := makeQ [("baixa", 5), ("urgente", 1), ("normal", 3)]
+
+/-
+#eval toListQ pqMake1
+#eval toListQ pqMake2
+
+#eval singleQ (emptyQ : PQ Nat Nat)
+#eval singleQ pqInsert1
+#eval singleQ pqInsert2
+
+#eval extract (emptyQ : PQ Nat Nat)
+#eval extract pqInsert1
+#eval extract pqInsert2
+-/
+
+def initialQueue : PQ Nat Nat := insertQ 10 5 emptyQ
+def elementsToAdd : List (Nat × Nat) := [(3, 1), (7, 4), (2, 2), (9, 6)]
+def finalQueue : PQ Nat Nat := addListQ elementsToAdd initialQueue
+
+/-
+#eval toListQ initialQueue
+#eval toListQ finalQueue
+-/
+
+def pq1 : PQ Nat Nat := makeQ [(2, 1), (5, 3)]
+def pq2 : PQ Nat Nat := makeQ [(1, 0), (8, 4)]
+def pqCombined : PQ Nat Nat := combineQ pq1 pq2
+
+/-
+#eval toListQ pq1
+#eval toListQ pq2
+#eval toListQ pqCombined
+
+#eval huffmanPQ [('a', 2), ('b', 3), ('c', 1), ('d', 20)]
+#eval huffmanPQ [('x', 1), ('y', 1)]
+#eval huffmanPQ [('z', 5)]
+#eval huffmanPQ []
+-/
+
+end PriorityQueue
+
 end Chapter8
