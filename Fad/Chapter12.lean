@@ -73,6 +73,74 @@ end
 
 -- # Section 12.3 The paragraph problem
 section
+open Chapter1 (foldr concatMap)
+open Chapter7 (minWith)
+open Chapter8.S1 (foldrn)
+
+/-- The major constraint on paragraphs is that all lines have to fit into a specified
+width. For simplicity, we assume a single globally defined value maxWidth that
+gives the maximum width a line can possess.
+-/
+def maxWidth : Nat := 80
+
+/--The definition depends on another globally defined constant optWidth, whose value
+is at most maxWidth and which specifies the optimum width of each line of a
+paragraph.
+-/
+def optWidth : Nat := 60
+
+/-- It is assumed that a text consists of a nonempty sequence of words, each word being
+a nonempty sequence of non-space characters. A paragraph therefore consists of at
+least one line.
+-/
+abbrev Word := List Char
+abbrev Text := List Word
+abbrev Line := List Word
+abbrev Para := List Line
+
+def width (line : Line) : Nat :=
+  foldrn (fun w n => w.length + 1 + n) (fun w => w.length) line
+
+--- another way
+def add (w : Word) (n : Nat) : Nat := w.length + 1 + n
+
+def width₁ : Line → Nat :=
+  foldrn add List.length
+---
+
+def fits (line : Line) : Bool :=
+  width line ≤  maxWidth
+
+--- test cases
+def ca : Word := ['c', 'a']
+def sa : Word := ['s', 'a']
+def line : Line := [ca, sa]
+
+#eval width line
+#eval width₁ line
+
+--- end test cases
+
+/-- ## Cost functions
+ cost₁ = length-/
+def cost₁ (p : Para) : Nat := p.length
+
+/-- cost₂ = sum . map waste . init
+  where waste line = maxWidth - width line-/
+def waste₂ (line : Line) : Nat := maxWidth - width line
+
+def cost₂ (p : Para) : Nat :=
+  (Chapter12.init p).map waste₂ |> List.sum
+
+/-- cost₃sum·map waste · init
+where waste line = (optWidth− width line)²-/
+def waste₃ (line : Line) : Nat :=
+  let d := optWidth - width line
+  d * d
+
+def cost₃ (p : Para) : Nat :=
+  (Chapter12.init p).map waste₃ |> List.sum
+
 
 end
 
