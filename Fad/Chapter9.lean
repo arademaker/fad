@@ -1,4 +1,7 @@
 import Lean.Data
+import Fad.Chapter1
+import Fad.Chapter3
+import Fad.Chapter7
 
 namespace Chapter9
 
@@ -30,6 +33,10 @@ def cost (t : Tree) : Int :=
 /- # Section 9.4 Prim’s algorithm -/
 
 namespace primsalgorithm
+
+open Chapter1 (concatMap apply)
+open Chapter3 (accumArray)
+open Chapter7 (minWith picks)
 
 abbrev State := (Tree × List Edge)
 
