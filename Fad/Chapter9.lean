@@ -29,6 +29,9 @@ abbrev Forest := List Tree
 def cost (t : Tree) : Int :=
   (edges t).map weight |>.sum
 
+
+--#eval cost ([1,2,3,4],[(1,2,5), (2,3,5), (3,4,10)])
+
 end SpanningTrees
 
 open SpanningTrees
