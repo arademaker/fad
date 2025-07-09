@@ -17,4 +17,13 @@ def weight (e : Edge) : Weight := e.2.2
 
 abbrev AdjArray := Lean.AssocList Vertex (List (Vertex × Weight))
 
+abbrev Tree   := Graph
+abbrev Forest := List Tree
+
+def cost (t : Tree) : Int :=
+  (edges t).map weight |>.sum
+
+
+--#eval cost ([1,2,3,4],[(1,2,5), (2,3,5), (3,4,10)])
+
 end Chapter9
