@@ -5,10 +5,10 @@ import Fad.«Chapter5-Ex»
 import Fad.Chapter7
 
 namespace Chapter9
-open Chapter1 (wrap apply)
-open Chapter5 (sortOn₃)
 
 namespace SpanningTrees
+open Chapter1 (wrap apply)
+open Chapter5 (sortOn₃)
 
 /- 9.1 Graphs and spanning trees -/
 
