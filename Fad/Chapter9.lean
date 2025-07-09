@@ -7,8 +7,6 @@ import Fad.Chapter7
 namespace Chapter9
 
 namespace SpanningTrees
-open Chapter1 (wrap apply)
-open Chapter5 (sortOn₃)
 
 /- 9.1 Graphs and spanning trees -/
 
@@ -34,6 +32,8 @@ def cost (t : Tree) : Int :=
 end SpanningTrees
 
 open SpanningTrees
+open Chapter1 (wrap apply)
+open Chapter5 (sortOn₃)
 
 /- 9.2 Kruskal’s algorithm -/
 
