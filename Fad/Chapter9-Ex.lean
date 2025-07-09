@@ -3,7 +3,6 @@ import Fad.Chapter3
 
 namespace Chapter9
 open Chapter3 (accumArray assocs indices)
-open SpanningTrees
 
 -- # Ex 9.2
 
