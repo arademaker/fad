@@ -6,9 +6,7 @@ import Fad.Chapter7
 
 namespace Chapter9
 
-namespace SpanningTrees
-
-/- 9.1 Graphs and spanning trees -/
+/- # Section 9.1 Graphs and spanning trees -/
 
 abbrev Vertex := Nat
 abbrev Weight := Int
@@ -30,15 +28,12 @@ def cost (t : Tree) : Int :=
   (edges t).map weight |>.sum
 
 
---#eval cost ([1,2,3,4],[(1,2,5), (2,3,5), (3,4,10)])
+/- # Section 9.2 Kruskal’s algorithm -/
 
-end SpanningTrees
+namespace  SpanningTrees
 
-open SpanningTrees
 open Chapter1 (wrap apply)
 open Chapter5 (sortOn₃)
-
-/- 9.2 Kruskal’s algorithm -/
 
 abbrev State  := Forest × List Edge
 
@@ -101,5 +96,8 @@ def kruskal₁ (g : Graph) : Tree :=
 def kruskal₂ (g : Graph) : Tree :=
   let n := (nodes g).length
   extract (apply (n - 1) gstep (start₁ g))
+
+
+end SpanningTrees
 
 end Chapter9
