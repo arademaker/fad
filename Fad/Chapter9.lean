@@ -34,6 +34,8 @@ def cost (t : Tree) : Int :=
 open Chapter7 (minWith picks)
 open Chapter1 (concatMap apply)
 
+--Adicionei um Prim ao final do elementos tratados nesse tópico para evitar conflitos com outras funções que no livro são definidas pelo mesmo nome.
+
 abbrev StatePrim := (Tree × List Edge)
 
 def addPrim (e: Edge) (t: Tree) : Tree :=
@@ -105,14 +107,21 @@ def prim' (g : Graph) : Tree :=
     match nodes g with
     | []     => (([], []), [])
     | v :: _ => (([v], []), edges g)
-
   let n := (nodes g).length
-
 (apply (n-1) gstepPrim (start)).1
 
 --#eval prim ([1,2,3,4],[(1, 2, 1), (1, 3, 2), (2, 3, 5), (3,4,20), (3,4,50)])
 --#eval prim' ([1,2,3,4],[(1, 2, 1), (1, 3, 2), (2, 3, 5), (3,4,20), (3,4,50)])
 
+abbrev Links := Std.HashMap Vertex (Vertex × Weight)
+abbrev StatePrim' := Links × List Vertex
 
+def parentPrim (ls : Links) (v : Vertex) : Vertex :=
+  (ls.get! v).1
+
+def weightPrim (ls: Links) (v : Vertex) : Weight :=
+  (ls.get! v).2
+
+abbrev Weights := Std.HashMap (Vertex × Vertex) Weight
 
 end Chapter9
