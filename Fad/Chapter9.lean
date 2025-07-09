@@ -34,7 +34,7 @@ def cost (t : Tree) : Int :=
 open Chapter7 (minWith picks)
 open Chapter1 (concatMap apply)
 
---Adicionei um Prim ao final do elementos tratados nesse tópico para evitar conflitos com outras funções que no livro são definidas pelo mesmo nome.
+--Adicionei um Prim ao final dos elementos tratados nesse tópico, para evitar conflitos com outras funções que no livro são definidas pelo mesmo nome.
 
 abbrev StatePrim := (Tree × List Edge)
 
