@@ -73,7 +73,7 @@ end
 
 -- # Section 12.3 The paragraph problem
 section
-open Chapter1 (foldr concatMap)
+open Chapter1 (foldr)
 open Chapter7 (minWith)
 open Chapter8.S1 (foldrn)
 
@@ -102,38 +102,35 @@ def width (line : Line) : Nat :=
   foldrn (fun w n => w.length + 1 + n) (fun w => w.length) line
 
 --- another way
-def add (w : Word) (n : Nat) : Nat := w.length + 1 + n
+def aux_add (w : Word) (n : Nat) : Nat := w.length + 1 + n
 
 def width₁ : Line → Nat :=
-  foldrn add List.length
+  foldrn aux_add List.length
 ---
 
 def fits (line : Line) : Bool :=
   width line ≤  maxWidth
 
 --- test cases
-def ca : Word := ['c', 'a']
-def sa : Word := ['s', 'a']
-def line : Line := [ca, sa]
+def foo : Word := ['f', 'o', 'o']
+def bar : Word := ['b', 'a', 'r']
+def line : Line := [foo, bar]
 
 #eval width line
 #eval width₁ line
 
 --- end test cases
 
-/-- ## Cost functions
- cost₁ = length-/
+/-- ## Cost functions -/
+
 def cost₁ (p : Para) : Nat := p.length
 
-/-- cost₂ = sum . map waste . init
-  where waste line = maxWidth - width line-/
+
 def waste₂ (line : Line) : Nat := maxWidth - width line
 
 def cost₂ (p : Para) : Nat :=
   (Chapter12.init p).map waste₂ |> List.sum
 
-/-- cost₃sum·map waste · init
-where waste line = (optWidth− width line)²-/
 def waste₃ (line : Line) : Nat :=
   let d := optWidth - width line
   d * d
@@ -141,6 +138,36 @@ def waste₃ (line : Line) : Nat :=
 def cost₃ (p : Para) : Nat :=
   (Chapter12.init p).map waste₃ |> List.sum
 
+def cost₄ (p : Para) : Nat :=
+  (Chapter12.init p).map waste₂ |> List.foldr max 0
+
+def cost₅ (p : Para) : Nat :=
+  (Chapter12.init p).map waste₃ |> List.foldr max 0
+
+/--  There is an obvious greedy algorithm for the paragraph problem: -/
+def add (p : Para) (w : Word) : Para :=
+  match p with
+  | [] => Chapter12.snoc w []
+  | _  =>
+    let candidates := [Chapter12.bind w p, Chapter12.snoc w p]
+    let valid := candidates.filter (λ para => fits (Chapter12.last para))
+    valid.headD []
+
+def basic_greedy (ws : Text) : Para :=
+  ws.foldl add []
+
+/-- Adding cost to the algorithm -/
+def tstep (ps : List Para) (w : Word) (cost : Para -> Nat) : List Para :=
+  match ps with
+  | [[]] => [[[w]]]
+  | _    =>
+    let newLine := Chapter7.minWith cost (ps.map (Chapter12.snoc w))
+    let sameLine := ps.map (Chapter12.bind w) |>.filter (fits ∘ Chapter12.last)
+    newLine :: sameLine
+
+def para (ws : Text) (cost : Para -> Nat) : Para :=
+  let step := λ ps w => tstep ps w cost
+  Chapter7.minWith cost (ws.foldl step [[]])
 
 end
 
