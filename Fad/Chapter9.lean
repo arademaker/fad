@@ -106,7 +106,6 @@ namespace primsalgorithm
 
 open Chapter7 (minWith picks)
 open Chapter1 (concatMap apply)
-open Chapter3 (accumArray)
 
 
 abbrev State := (Tree × List Edge)
