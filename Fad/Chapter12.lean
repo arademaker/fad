@@ -25,12 +25,35 @@ def splits {a : Type} : List a → List (List a × List a)
  | [] => []
  | x :: xs => ([x], xs) :: (splits xs).map fun ⟨ys, zs⟩ => (x :: ys, zs)
 
-partial def parts: List a → List (Partition a)
- | [] => [[]]
- | xs =>
-   (splits xs).flatMap fun ⟨ys, zs⟩ =>
-     (parts zs).map fun yss => ys :: yss
+theorem List.length_lt_of_cons_split {α : Type} (xs ys zs : List α)
+  (h : (ys, zs) ∈ splits xs) : zs.length < xs.length := by
+  induction xs generalizing ys zs with
+  | nil =>
+    simp [splits] at h
+  | cons x xs ih =>
+    simp only [splits, List.map, List.flatMap, List.mem_cons, List.mem_map] at h
+    cases h with
+    | inl h' =>
+      simp at h'
+      cases h'; simp_all [List.length]
+    | inr h'' =>
+      rcases h'' with ⟨p, hin, heq⟩
+      cases p with
+      | mk ys' zs' =>
+        cases heq
+        specialize ih ys' zs' hin
+        simp [List.length]
+        exact Nat.lt_succ_of_lt ih
 
+def parts {a : Type} : List a → List (Partition a)
+  | [] => [[]]
+  | xs =>
+    (splits xs).flatMap fun ⟨ys, zs⟩ =>
+      have : zs.length < xs.length := by
+        apply List.length_lt_of_cons_split xs ys zs
+        sorry
+      (parts zs).map fun yss => ys :: yss
+  termination_by xs => xs.length
 
 def cons (x : a) (p : Partition a) : Partition a :=
  [x] :: p
