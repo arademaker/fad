@@ -25,7 +25,8 @@ def splits {a : Type} : List a → List (List a × List a)
  | [] => []
  | x :: xs => ([x], xs) :: (splits xs).map fun ⟨ys, zs⟩ => (x :: ys, zs)
 
-theorem List.length_lt_of_cons_split {α : Type} (xs ys zs : List α)
+
+theorem length_lt_of_cons_split {α : Type} (xs ys zs : List α)
   (h : (ys, zs) ∈ splits xs) : zs.length < xs.length := by
   induction xs generalizing ys zs with
   | nil =>
@@ -50,7 +51,7 @@ def parts {a : Type} : List a → List (Partition a)
   | xs =>
     (splits xs).flatMap fun ⟨ys, zs⟩ =>
       have : zs.length < xs.length := by
-        apply List.length_lt_of_cons_split xs ys zs
+        apply length_lt_of_cons_split xs ys zs
         sorry
       (parts zs).map fun yss => ys :: yss
   termination_by xs => xs.length
