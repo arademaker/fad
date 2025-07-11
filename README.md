@@ -119,9 +119,9 @@ Along the way, readers gain experience not only in algorithm design, but also in
 
 3.  Partitions
 
-    - [ ] 12.1 Ways of generating partitions
+    - [x] 12.1 Ways of generating partitions
     - [ ] 12.2 Managing two bank accounts
-    - [ ] 12.3 The paragraph problem
+    - [x] 12.3 The paragraph problem
     - [ ] Exercises
 
 ### Part Five: Dynamic Programming
