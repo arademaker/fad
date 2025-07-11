@@ -217,6 +217,8 @@ def start (n : Nat) : State' :=
 def gstep' (wa : Weights) (s: State') : State' :=
   let (lk, vs) := s
   let better (vwa vwb : Vertex × Weight)  := cond (vwa.2 ≤ vwb.2) vwa vwb
+  let v := minWith (weight' lk) vs
+  let vs' := vs.filter (· ≠ v)
   sorry
 
 
