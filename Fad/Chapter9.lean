@@ -219,7 +219,16 @@ def gstep' (wa : Weights) (s: State') : State' :=
   let better (vwa vwb : Vertex × Weight)  := cond (vwa.2 ≤ vwb.2) vwa vwb
   let v := minWith (weight' lk) vs
   let vs' := vs.filter (· ≠ v)
-  sorry
+  
+  let lk' := vs'.foldl (fun acc u =>
+    let newLink := (v, wa.get! (u, v))
+    acc.alter u (fun curr =>
+      match curr with
+      | none => some newLink
+      | some existing => some (better existing newLink)
+      )
+  ) lk
+(lk', vs')
 
 
 def extract (s : State') : Tree :=
