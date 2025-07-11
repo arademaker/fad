@@ -207,15 +207,17 @@ def start (n : Nat) : State' :=
   let vs := List.range n |>.map (· + 1)
   let lk : Links := 
     vs.foldl (init := Std.HashMap.emptyWithCapacity) 
-      fun map v => 
-        if v == 1 then 
-          map.insert v (1, 0)
-        else 
-          map.insert v (v, 2^63) --Utilizei o valor de 2^63 para representar o comprimento infinito (definido como maxBound em Haskell)
+      fun map v => cond (v==1) (map.insert v (1, 0)) (map.insert v (v, 2^63) )
+      --Utilizei o valor de 2^63 para representar o comprimento infinito (definido como maxBound em Haskell)
   (lk, vs)
 
 --#eval start 3
 
+
+def gstep' (wa : Weights) (s: State') : State' :=
+  let (lk, vs) := s
+  let better (vwa vwb : Vertex × Weight)  := cond (vwa.2 ≤ vwb.2) vwa vwb
+  sorry
 
 
 def extract (s : State') : Tree :=
