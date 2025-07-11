@@ -134,7 +134,49 @@ def weight' (ls: Links) (v : Vertex) : Weight :=
 
 abbrev Weights := Std.HashMap (Vertex × Vertex) Weight
 
+def start (n : Nat) : State' :=
+  let vs := List.range n |>.map (· + 1)
+  let lk : Links := 
+    vs.foldl (init := Std.HashMap.emptyWithCapacity) 
+      fun map v => 
+        if v == 1 then 
+          map.insert v (1, 0)
+        else 
+          map.insert v (v, 2^63) --Utilizei o valor de 2^63 para representar o comprimento infinito (definido como maxBound em Haskell)
+  (lk, vs)
 
+--#eval start 3
+
+def extract (s : State') : Tree :=
+  let (ls, _) := s
+  let vs := ls.toList.map (fun (v, _) => v)
+  let es := ls.toList.filterMap fun (v, (u, w)) => cond (v ≠ 1) (some (u, v, w)) (none)
+  (vs, es)
+
+
+def extract (s : State') : Tree :=
+  let (ls, _) := s
+  let vs := ls.toList.map (fun (v, _) => v)
+  let es := ls.toList.filterMap fun (v, (u, w)) => cond (v ≠ 1) (some (u, v, w)) (none)
+  (vs, es)
+
+
+
+/-
+
+def linkA : Links := Std.HashMap.emptyWithCapacity.insert 1 (2,3)
+  |>.insert 2 (3,5)
+  |>.insert 3 (4,7)
+  |>.insert 4 (5,9)
+  |>.insert 5 (6,11)
+  |>.insert 6 (7,13)
+
+def stateA : State' :=
+  (linkA, [1,2,3,4,5,6,7])
+
+#eval extract stateA 
+
+-/
 
 end primsalgorithm
 
