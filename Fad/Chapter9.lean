@@ -221,14 +221,17 @@ def gstep' (wa : Weights) (s: State') : State' :=
   let vs' := vs.filter (· ≠ v)
   
   let lk' := vs'.foldl (fun acc u =>
-    let newLink := (v, wa.get! (u, v))
-    acc.alter u (fun curr =>
-      match curr with
-      | none => some newLink
-      | some existing => some (better existing newLink)
-      )
+   match wa.get? (u, v) with
+    | none => acc
+    | some w =>
+        let newLink := (v, w) 
+        acc.alter u (fun curr =>
+          match curr with
+          | none => some newLink
+          | some existing => some (better existing newLink)
+        )
   ) lk
-(lk', vs')
+  (lk', vs')
 
 
 def extract (s : State') : Tree :=
@@ -238,6 +241,12 @@ def extract (s : State') : Tree :=
   (vs, es)
 
 /-
+def weightsA : Weights := Std.HashMap.emptyWithCapacity.insert (2,3) 5
+  |>.insert (3,4) 7
+  |>.insert (4,5) 9
+  |>.insert (5,6) 1
+  |>.insert (6,7) 13
+
 def linkA : Links := Std.HashMap.emptyWithCapacity.insert 1 (2,3)
   |>.insert 2 (3,5)
   |>.insert 3 (4,7)
@@ -245,10 +254,13 @@ def linkA : Links := Std.HashMap.emptyWithCapacity.insert 1 (2,3)
   |>.insert 5 (6,11)
   |>.insert 6 (7,13)
 
-def stateA : State' :=
-  (linkA, [1,2,3,4,5,6,7])
+def vertS : List Vertex :=
+  [2,3,4,5,6]
 
-#eval extract stateA
+def stateA : State' :=
+  (linkA, vertS)
+
+#eval extract (gstep' weightsA stateA)
 -/
 
 end primsalgorithm
