@@ -60,8 +60,6 @@ def minWith {a b : Type} [LE b] [Inhabited a]
 -- # Section 7.2 Greedy sorting algorithms
 section
 
-#eval Chapter1.tails [1,2,3]
-
 variable {a : Type} [Inhabited a]
   [Ord a] [Min a]
   [LT a] [h₁ : DecidableRel (α := a) (· < ·)]
