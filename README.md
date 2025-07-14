@@ -1,6 +1,11 @@
 
 # Functional Algorithms Design <a href='#'><img src="img/cover.jpeg" align="right" height="168" /></a>
 
+[![Lean Action CI](https://github.com/emap-taa-20251/fad/actions/workflows/lean_action_ci.yml/badge.svg)](https://github.com/emap-taa-20251/fad/actions/workflows/lean_action_ci.yml)
+[![Lean Version](https://img.shields.io/badge/Lean-4.20.0-blue)](https://lean-lang.org/)
+[![Mathlib](https://img.shields.io/badge/Mathlib-✓-green)](https://github.com/leanprover-community/mathlib4)
+
+> *"Algorithm design meets formal verification"*
 
 ## Introduction
 
@@ -164,3 +169,18 @@ Along the way, readers gain experience not only in algorithm design, but also in
     - [ ] 16.3 Navigating a warehouse
     - [ ] 16.4 The 8‑puzzle
     - [ ] Exercises
+
+
+## :handshake: Contributing
+
+Please see [CONTRIBUTING.org](CONTRIBUTING.org) for guidelines on how to contribute to this project.
+
+## :book: References
+
+- [Algorithm Design with Haskell](https://www.cs.ox.ac.uk/publications/books/adwh/) - The original book this adaptation is based on
+
+- [Lean 4 Manual](https://lean-lang.org/lean4/doc/) - Official Lean 4 documentation
+
+## :note: License
+
+This project is licensed under Apache License 2.0. See LICENSE.
