@@ -181,6 +181,6 @@ Please see [CONTRIBUTING.org](CONTRIBUTING.org) for guidelines on how to contrib
 
 - [Lean 4 Manual](https://lean-lang.org/lean4/doc/) - Official Lean 4 documentation
 
-## :note: License
+## :pushpin: License
 
 This project is licensed under Apache License 2.0. See LICENSE.
