@@ -1,5 +1,6 @@
 import Lean.Data
 import Fad.Chapter1
+import Fad.Chapter3
 import Fad.«Chapter1-Ex»
 import Fad.«Chapter5-Ex»
 import Fad.Chapter7
@@ -97,7 +98,170 @@ def kruskal₂ (g : Graph) : Tree :=
   let n := (nodes g).length
   extract (apply (n - 1) gstep (start₁ g))
 
-
 end SpanningTrees
 
+/- # Section 9.4 Prim’s algorithm -/
+
+namespace primsalgorithm
+
+open Chapter7 (minWith picks)
+open Chapter1 (concatMap apply)
+
+
+abbrev State := (Tree × List Edge)
+
+
+def add (e: Edge) (t: Tree) : Tree :=
+  let (vs, es) := t
+  cond (vs.contains (souce e)) (target e :: vs, e :: es) (souce e :: vs, e::es)
+
+
+def safeEdge (e: Edge) (t: Tree) : Bool :=
+  (nodes t).contains (souce e) ≠ (nodes t).contains (target e)
+
+
+def steps (s: State) : List State :=
+  let (t,es) := s
+  (picks es).filterMap fun (e, es') => cond (safeEdge e t) (some (add e t, es')) none
+
+
+def spats (g : Graph) : List Tree :=
+  let start : State :=
+    match nodes g with
+     | []     => (([], []), [])
+     | v :: _ => (([v], []), edges g)
+
+  let done : State → Bool :=
+    fun (t, _) => (nodes t).length == (nodes g).length
+
+  let rec helper (ss : List State) (fuel: Nat): List Tree :=
+    match fuel with
+      | 0        => panic! "Never here"
+      | fuel + 1 => cond (ss.all done) (ss.map Prod.fst) (helper (concatMap steps ss) fuel)
+        termination_by fuel
+
+  helper [start] g.1.length
+
+
+def mcst : Graph → Tree :=
+  minWith cost ∘ spats
+
+
+def gstep : State → State
+  | (t, [])      => (t, [])
+  | (t, e :: es) =>
+
+    let keep (e: Edge) (s: State) : State :=
+      let (t', es') := s
+      (t', e :: es')
+
+    cond (safeEdge e t) (add e t, es) (keep e (gstep (t, es)))
+
+
+def prim (g : Graph) : Tree :=
+  let start : State :=
+    match nodes g with
+    | []     => (([], []), [])
+    | v :: _ => (([v], []), edges g)
+
+  let done : State → Bool :=
+    fun (t, _) => (nodes t).length == (nodes g).length
+
+  let rec helper (s : State) (fuel : Nat) : State :=
+    match fuel with
+    | 0        => panic! "Never Here"
+    | fuel + 1 => cond (done s) s (helper (gstep s) fuel)
+    termination_by fuel
+
+  (helper start g.1.length).1
+
+
+def prim' (g : Graph) : Tree :=
+  let start : State :=
+    match nodes g with
+    | []     => (([], []), [])
+    | v :: _ => (([v], []), edges g)
+  let n := (nodes g).length
+(apply (n-1) gstep (start)).1
+
+/-
+def graphA : Graph := ([1,2,3,4],[(1, 2, 1), (1, 3, 2), (2, 3, 5), (3,4,20), (3,4,50)])
+
+#eval prim graphA
+#eval prim' graphA
+-/
+
+
+abbrev Links := Std.HashMap Vertex (Vertex × Weight)
+abbrev State' := Links × List Vertex
+
+def parent (ls : Links) (v : Vertex) : Vertex :=
+  (ls.get! v).1
+
+def weight' (ls: Links) (v : Vertex) : Weight :=
+  (ls.get! v).2
+
+abbrev Weights := Std.HashMap (Vertex × Vertex) Weight
+
+def start (n : Nat) : State' :=
+  let vs := List.range n |>.map (· + 1)
+  let lk : Links := 
+    vs.foldl (init := Std.HashMap.emptyWithCapacity) 
+      fun map v => cond (v==1) (map.insert v (1, 0)) (map.insert v (v, 2^63) )
+      --Utilizei o valor de 2^63 para representar o comprimento infinito (definido como maxBound em Haskell)
+  (lk, vs)
+
+--#eval start 3
+
+
+def gstep' (wa : Weights) (s: State') : State' :=
+  let (lk, vs) := s
+  let better (vwa vwb : Vertex × Weight)  := cond (vwa.2 ≤ vwb.2) vwa vwb
+  let v := minWith (weight' lk) vs
+  let vs' := vs.filter (· ≠ v)
+  
+  let lk' := vs'.foldl (fun acc u =>
+   match wa.get? (u, v) with
+    | none => acc
+    | some w =>
+        let newLink := (v, w) 
+        acc.alter u (fun curr =>
+          match curr with
+          | none => some newLink
+          | some existing => some (better existing newLink)
+        )
+  ) lk
+  (lk', vs')
+
+
+def extract (s : State') : Tree :=
+  let (ls, _) := s
+  let vs := ls.toList.map (fun (v, _) => v)
+  let es := ls.toList.filterMap fun (v, (u, w)) => cond (v ≠ 1) (some (u, v, w)) (none)
+  (vs, es)
+
+/-
+def weightsA : Weights := Std.HashMap.emptyWithCapacity.insert (2,3) 5
+  |>.insert (3,4) 7
+  |>.insert (4,5) 9
+  |>.insert (5,6) 1
+  |>.insert (6,7) 13
+
+def linkA : Links := Std.HashMap.emptyWithCapacity.insert 1 (2,3)
+  |>.insert 2 (3,5)
+  |>.insert 3 (4,7)
+  |>.insert 4 (5,9)
+  |>.insert 5 (6,11)
+  |>.insert 6 (7,13)
+
+def vertS : List Vertex :=
+  [2,3,4,5,6]
+
+def stateA : State' :=
+  (linkA, vertS)
+
+#eval extract (gstep' weightsA stateA)
+-/
+
+end primsalgorithm
 end Chapter9
