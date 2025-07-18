@@ -180,7 +180,7 @@ theorem partition3_length {a : Type} [LT a] [DecidableRel (α := a) (· < ·)]
     by_cases l: x > y
     · simp at *
       repeat rw [← partition3]
-      repeat simp [k, l]
+      repeat simp [k]
       rw [← ih]
       by_cases m: x = y
       · simp [m]
@@ -188,7 +188,7 @@ theorem partition3_length {a : Type} [LT a] [DecidableRel (α := a) (· < ·)]
         rw[add_assoc]
         nth_rewrite 3 [add_comm]
         rfl
-      simp [k, l, m]
+      simp [m]
       nth_rewrite 2 [add_assoc]
       nth_rewrite 3 [add_comm]
       rw [← add_assoc]
@@ -196,7 +196,7 @@ theorem partition3_length {a : Type} [LT a] [DecidableRel (α := a) (· < ·)]
       nth_rewrite 3 [add_comm]
       rw [← add_assoc]
     by_cases m: x = y
-    · simp [k, l]
+    · simp [k]
       simp at *
       simp [m]
       repeat rw [← partition3]
@@ -205,7 +205,7 @@ theorem partition3_length {a : Type} [LT a] [DecidableRel (α := a) (· < ·)]
       nth_rewrite 3 [add_comm]
       rw [← add_assoc]
       rw [ih]
-    simp [k, l, m]
+    simp [k, m]
     repeat rw [← partition3]
     nth_rewrite 2 [add_assoc]
     nth_rewrite 3 [add_comm]
@@ -216,7 +216,7 @@ theorem partition3_length {a : Type} [LT a] [DecidableRel (α := a) (· < ·)]
     rw [ih]
 
 /- may not be necessary -/
-def select' (k : Nat) (xs : List a) (q: k ≤ xs.length): a := 
+def select' (k : Nat) (xs : List a) (q: k ≤ xs.length): a :=
   let rec help (k : Nat) (xs : List a) (q: k ≤ xs.length) (fuel: Nat) : a :=
    match fuel with
    | 0 => panic!"Never here"
@@ -229,8 +229,8 @@ def select' (k : Nat) (xs : List a) (q: k ≤ xs.length): a :=
      if      h₁:  k ≤ m     then   help k us (by omega) fuel
      else if h₂:  k ≤ m + n then vs[k - m - 1]
      else                        help (k-m-n) ws (by
-     simp [m, n]; rw [partition3_length]; simp [q]) fuel    
-  termination_by fuel 
+     simp [m, n]; rw [partition3_length]; simp [q]) fuel
+  termination_by fuel
   help k xs q xs.length
-  
+
 end Chapter6

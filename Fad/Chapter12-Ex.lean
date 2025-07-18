@@ -64,7 +64,7 @@ example
   simp [Function.comp]
   induction xs with
   | nil =>
-    simp [List.foldr, concatMap, flip]
+    simp [List.foldr, flip]
   | cons a as ih =>
     have h1 := h a
     sorry

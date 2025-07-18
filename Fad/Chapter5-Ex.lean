@@ -179,7 +179,7 @@ example (xs : List Nat) : expression₂ xs = reverse xs := by
   | nil => rfl
   | cons x xs ih =>
     simp [expression₂, reverse] at *
-    simp [List.foldr_cons, List.foldl_cons, flip] at *
+    simp [List.foldr_cons, flip] at *
     sorry
 
 

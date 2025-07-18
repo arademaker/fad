@@ -124,7 +124,7 @@ example (x : a) : snoc x ∘ fromSL = fromSL ∘ snocSL x := by
   unfold snoc snocSL fromSL
   match h: lhs with
   | [] =>
-    simp [h]
+    simp
     simp at ok
     apply ok.elim <;> intro h2; simp [h2]
     have a :: [] := rhs
@@ -270,7 +270,7 @@ example : ∀ (as : SymList a), fromSL (tailSL as) = tail (fromSL as) := by
     | nil => simp [tailSL, fromSL, nil]
     | cons b bs ih =>
       simp [fromSL, tailSL, nil]
-      simp [ok] at *
+      simp at *
       rw [ok]
       rw [List.reverse_nil, List.nil_append, List.tail]
   | cons a as =>
@@ -302,7 +302,7 @@ theorem length_tail_lt_length (sl : SymList a) (h : sl ≠ nil)
     cases ok with
     | intro h1 h2 =>
       simp [k] at h1
-      cases h1 with 
+      cases h1 with
       | inl l => simp_all; contradiction
       | inr m => simp [m]
   · simp [k]
@@ -315,7 +315,7 @@ theorem length_tail_lt_length (sl : SymList a) (h : sl ≠ nil)
       omega
     simp [l]
     apply Nat.sub_lt_self
-    simp [k]
+    simp
     have h : 0 < lsl.length := by
       cases lsl with
       | nil => contradiction
@@ -328,7 +328,7 @@ theorem headSL_none_iff_nilSL {sl : SymList a} : headSL sl = none ↔ sl = nil :
   split at h
   unfold nil
   exact rfl
-  repeat simp [eq_comm, <-Option.isNone_iff_eq_none] at h
+  repeat simp [eq_comm] at h
   rw [h]
   unfold headSL nil
   simp
@@ -455,7 +455,7 @@ theorem tails_append_singleton (xs : List α) (x : α) :
   induction xs with
   | nil      => simp
   | cons y ys ih =>
-      simp [List.tails, ih, List.map_append]
+      simp [List.tails, ih]
 
 theorem map_reverse_tails_snoc (x : α) (xs : List α) :
     List.map reverse (snoc x xs).tails =
@@ -510,11 +510,9 @@ theorem inits_eq {a : Type} : ∀ xs : List a, inits₁ xs = inits₂ xs
     simp
   | x :: xs => by
     have ih := inits_eq xs
-    simp [ inits₁, inits₂,
-            List.reverse_cons,
-            map_reverse_tails_snoc,
-            scanl_cons, fromSL_snoc, ih,
-            Function.comp, flip, map_reverse] at *
+    simp [inits₁, inits₂,
+          List.reverse_cons,
+          Function.comp, flip] at *
     sorry
 
 

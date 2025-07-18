@@ -54,7 +54,7 @@ theorem sum_snoc (ms : List Nat) (n : Nat) :
   unfold sum
   induction ms with
   | nil =>
-    simp [snoc, sum]
+    simp [snoc]
   | cons m ms ih =>
     simp[snoc, ih]
     rw [<- Nat.add_assoc, Nat.add_comm m n, Nat.add_assoc]
@@ -72,9 +72,9 @@ theorem sum_append (ms ns : List Nat) :
   unfold sum
   induction ms with
   | nil =>
-    simp [sum, List.foldr]
+    simp [List.foldr]
   | cons m ms ih =>
-    simp[sum]
+    simp
     rw [<- foldr_append, ih, Nat.add_assoc]
 
 -- sum (reverse ns) = sum ns --

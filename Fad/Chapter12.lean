@@ -32,7 +32,7 @@ theorem length_lt_of_cons_split {α : Type} (xs ys zs : List α)
   | nil =>
     simp [splits] at h
   | cons x xs ih =>
-    simp only [splits, List.map, List.flatMap, List.mem_cons, List.mem_map] at h
+    simp only [splits, List.mem_cons, List.mem_map] at h
     cases h with
     | inl h' =>
       simp at h'

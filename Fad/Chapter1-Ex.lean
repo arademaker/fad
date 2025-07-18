@@ -189,7 +189,7 @@ termination_by xs.length
 
 
 def last₁ {a : Type} (as : List a) (ok : as ≠ []) : a :=
-  as.reverse.head (by simp [List.length_reverse]; assumption)
+  as.reverse.head (by simp ; assumption)
 
 def init₁ {a : Type} : List a → List a :=
   List.reverse ∘ List.tail ∘ List.reverse
@@ -229,7 +229,7 @@ example {a b : Type} (f : b → a → b) (e : b) :
   List.map (List.foldl f e) ∘ inits = scanl f e := by
   funext xs
   induction xs generalizing e with
-  | nil => simp [map, inits, foldl, scanl]
+  | nil => simp [inits, scanl]
   | cons x xs ih =>
     rw [Function.comp, inits]; simp
     rw [foldl_comp, scanl]
@@ -242,9 +242,9 @@ example {α β : Type} (f : α → β → β) (e : β) :
   induction xs with
   | nil =>
     simp [Function.comp]
-    simp [tails, map, List.scanr, List.foldr]
+    simp [tails, List.foldr]
   | cons y ys ih =>
-    simp [List.map, tails]
+    simp [tails]
     rw [Function.comp] at ih
     rw [ih]
 

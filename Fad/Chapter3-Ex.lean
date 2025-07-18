@@ -192,11 +192,11 @@ example : ∀ (xs : List a), xs = fromRA (toRA xs) := by
     match toRA xs with
     | [] => rfl
     | (Digit.zero :: ds) =>
-      simp [fromRA, fromT, Tree.mk]
+      simp [fromRA]
       rw [concatMap]
       sorry
     | (Digit.one t :: ds) =>
-      simp [fromRA, fromT, Tree.mk]
+      simp [fromRA]
       rw [concatMap]
       sorry
 

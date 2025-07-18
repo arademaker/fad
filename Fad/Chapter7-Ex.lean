@@ -119,7 +119,7 @@ example (x : Nat) : ∀ xs, xs ≠ [] →
  minimum (xs.map (x :: ·)) = (x :: ·) (minimum xs)
  := by
  intro xs h
- simp [Function.comp]
+ simp
  induction xs with
  | nil => contradiction
  | cons a as ih =>

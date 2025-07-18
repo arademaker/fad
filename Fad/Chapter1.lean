@@ -350,7 +350,7 @@ theorem map_map {α β γ : Type} (f : β → γ) (g : α → β) :
   induction as with
   | nil => rfl
   | cons x xs ih =>
-    simp [List.map, ih]
+    simp [List.map]
 
 
 theorem concatMap_map {α β : Type} (f : α → List β) (g : β → α) :
@@ -358,7 +358,7 @@ theorem concatMap_map {α β : Type} (f : α → List β) (g : β → α) :
   funext as
   induction as with
   | nil => rfl
-  | cons x xs ih => simp [concatMap, ih]
+  | cons x xs ih => simp [concatMap]
 
 
 theorem foldr_map {α β : Type} (f : α → β → β) (e : β) (g : β → α) :
@@ -390,7 +390,7 @@ example {a : Type} : ∀ xs : List a, [] ++ xs = xs := by
  intro h1
  induction h1 with
  | nil => rfl
- | cons ha hs => simp [List.append]
+ | cons ha hs => grind
 
 
 example {a b : Type} (xs ys : List a) (f : a → b → b) (e : b)
@@ -517,11 +517,11 @@ def collapse₃ (xss : List (List Int)) : List Int :=
   help (0, id) (labelsum xss) []
 
 
-/-
-#eval collapse₃ [[1],[-3],[2,4]]
-#eval collapse₃ [[-2,1],[-3],[2,4]]
-#eval collapse₃ [[-2,1],[3],[2,4]]
--/
+example : collapse₃ [[1],[-3],[2,4]] = [1] :=
+  rfl
+
+example : collapse₃ [[-2,1],[3],[2,4]] = [-2, 1, 3] :=
+  rfl
 
 
 end Chapter1

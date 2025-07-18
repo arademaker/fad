@@ -100,7 +100,7 @@ example [Inhabited a] (ts : List (Tree a)) :
   | nil =>
     simp [rollup, foldl1, spine]
   | cons t ts ih =>
-    simp [rollup, foldl1, List.foldl, spine]
+    simp [rollup, foldl1, List.foldl]
     simp [rollup, foldl1] at ih
     sorry
 
