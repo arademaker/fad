@@ -72,8 +72,7 @@ def spats (g : Graph) : List Tree :=
   (Chapter1.until' (fun ss => ss.all done) (fun ss => List.flatMap steps ss)) (wrap (start₀ g))
   |>.map extract
 
-def MCC (g : Graph) : Tree :=
- Chapter7.minWith cost (spats g)
+def MCC (g : Graph) : Tree := Chapter7.minWith cost (spats g)
 
 def gstep (s : State) : State :=
   match s with
@@ -99,6 +98,7 @@ def kruskal₂ (g : Graph) : Tree :=
   extract (apply (n - 1) gstep (start₁ g))
 
 end SpanningTrees
+
 
 /- # Section 9.4 Prim’s algorithm -/
 
