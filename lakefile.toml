@@ -13,3 +13,7 @@ root = "Main"
 name = "mathlib"
 scope = "leanprover-community"
 
+[[require]]
+name = "subverso"
+scope = "leanprover"
+
