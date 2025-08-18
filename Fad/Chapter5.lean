@@ -367,6 +367,10 @@ def subs (xs ys : List (a × Label)) : List (a × Pair) :=
 def switch : a × Pair → a × Pair
 | (x, (i, j)) => (-x, (j, i))
 
+instance : Ord (a × Pair) where
+  compare p q :=
+    compare p.1 q.1
+
 def sortWith (abs : List (a × Pair)) (xis yis : List (a × Label))
   : List (a × Pair) :=
   let a := Std.HashMap.ofList (qsort₂ compare abs |>.map Prod.snd |>.zipIdx)
