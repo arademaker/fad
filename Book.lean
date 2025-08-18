@@ -1,6 +1,6 @@
 import VersoManual
 
-import Fad.FP
+import Book.FP
 
 open Verso.Genre Manual
 open Verso Code External

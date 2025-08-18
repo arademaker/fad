@@ -1,5 +1,5 @@
 import VersoManual
-import Fad.Basic
+import Book.Basic
 
 open Verso.Genre Manual
 open Fad

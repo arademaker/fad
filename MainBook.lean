@@ -1,5 +1,5 @@
 import VersoManual
-import Fad
+import Book
 
 open Verso.Genre Manual
 open Verso Code External
