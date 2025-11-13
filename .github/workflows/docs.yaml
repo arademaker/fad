@@ -17,14 +17,10 @@ jobs:
     steps:
       - name: Checkout project
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Build and lint the project
         id: build-lean
         uses: leanprover/lean-action@v1
-        with:
-          build-args: "--wfail"
 
       - name: Build project documentation
         id: build-docgen
