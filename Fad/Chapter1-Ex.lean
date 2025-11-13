@@ -1,6 +1,5 @@
 import Fad.Chapter1
 import Batteries.Data.List.Basic
-import Mathlib.Data.List.Scan
 
 namespace Chapter1
 
@@ -242,11 +241,12 @@ example {α β : Type} (f : α → β → β) (e : β) :
   induction xs with
   | nil =>
     simp [Function.comp]
-    simp [tails, List.foldr]
+    simp [tails, List.foldr, List.scanr]
   | cons y ys ih =>
-    simp [tails]
+    simp [tails, List.foldr]
     rw [Function.comp] at ih
     rw [ih]
+    sorry
 
 
 /- # Exercicio 1.13 -/
