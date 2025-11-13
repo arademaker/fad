@@ -1,12 +1,12 @@
 name = "fad"
 version = "0.1.0"
-defaultTargets = ["fad"]
+defaultTargets = ["Fad"]
 
 [[lean_lib]]
 name = "Fad"
 
 [[lean_exe]]
-name = "fad"
+name = "main"
 root = "Main"
 
 [[require]]
