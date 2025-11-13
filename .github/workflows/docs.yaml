@@ -3,7 +3,7 @@ name: Build and Deploy Documentation
 on:
   push:
     branches:
-      - main  # Build docs on merges to main
+      - main  
   workflow_dispatch:
 
 permissions:
