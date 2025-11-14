@@ -1,7 +1,7 @@
 
 # Functional Algorithms Design <a href='#'><img src="img/cover.jpeg" align="right" height="168" /></a>
 
-[![Lean Action CI](https://github.com/emap-taa-20251/fad/actions/workflows/docs.yml/badge.svg)](https://github.com/emap-taa-20251/fad/actions/workflows/docs.yml)
+[![Build and Deploy Documentation](https://github.com/arademaker/fad/actions/workflows/docs.yml/badge.svg)](https://github.com/arademaker/fad/actions/workflows/docs.yml)
 [![Lean Version](https://img.shields.io/badge/Lean-4.20.0-blue)](https://lean-lang.org/)
 [![Mathlib](https://img.shields.io/badge/Mathlib-✓-green)](https://github.com/leanprover-community/mathlib4)
 
