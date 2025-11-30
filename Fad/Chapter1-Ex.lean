@@ -235,19 +235,26 @@ example {a b : Type} (f : b → a → b) (e : b) :
     rw [← ih (f e x)]
     simp
 
+theorem scanr_fst_eq_foldr (f : α → β → β) (e : β) (xs : List α) :
+  (List.foldr (fun a (b, l) => (f a b, b :: l)) (e, []) xs).1 = List.foldr f e xs := by
+  induction xs with
+  | nil => rfl
+  | cons y ys ih =>
+    rw [List.foldr]
+    simp [ih]
+
 example {α β : Type} (f : α → β → β) (e : β) :
   List.map (List.foldr f e) ∘ tails = List.scanr f e := by
   funext xs
   induction xs with
   | nil =>
-    simp [Function.comp]
-    simp [tails, List.foldr, List.scanr]
+    rw [Function.comp]
+    simp [tails, List.scanr]
   | cons y ys ih =>
-    simp [tails, List.foldr]
     rw [Function.comp] at ih
-    rw [ih]
-    sorry
-
+    rw [Function.comp, tails, List.map]
+    rw [ih, ← scanr_fst_eq_foldr]
+    simp [List.scanr]
 
 /- # Exercicio 1.13 -/
 
