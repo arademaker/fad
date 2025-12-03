@@ -519,13 +519,17 @@ theorem inits_eq {a : Type} : ∀ xs : List a, inits₁ xs = inits₂ xs
 -- # Section 3.2 Random-access lists
 
 def fetch {a : Type} : Nat → List a → Option a
- | _, [] => none
+ | _, []      => none
  | k, x :: xs => if k = 0 then x else fetch (k - 1) xs
 
-/-
-#eval [1,2,3,4].get? 2
+/-- info: some 3 -/
+#guard_msgs in
 #eval fetch 2 [1,2,3,4]
--/
+
+/-- info: some 3 -/
+#guard_msgs in
+#eval [1,2,3,4][2]?
+
 
 inductive Tree (α : Type) : Type where
  | leaf (n : α) : Tree α
