@@ -166,15 +166,15 @@ def expression₂ {α : Type} : List α → List α :=
 def reverse {α : Type} : List α → List α :=
   List.foldl (flip List.cons) []
 
-theorem expression₁_eq_reverse_aux (g : List α → List α) (xs ys : List α) :
-  (List.foldl (λ f x => (x :: ·) ∘ f) g xs) ys = List.foldl (flip List.cons) (g ys) xs := by
+theorem expression₁_eq_reverse_aux (g : List α → List α) (xs ys : List α)
+  : (xs.foldl (λ f x => (x :: ·) ∘ f) g) ys = xs.foldl (flip List.cons) (g ys) := by
   induction xs generalizing g with
   | nil => rfl
   | cons z zs ih =>
     exact ih ((fun x => z :: x) ∘ g)
 
-theorem expression₂_eq_reverse_aux (xs ys : List α) :
-  (List.foldr (λ x f => f ∘ (x :: ·)) id xs) ys = List.foldl (flip List.cons) ys xs := by
+theorem expression₂_eq_reverse_aux (xs ys : List α)
+  : (xs.foldr (λ x f => f ∘ (x :: ·)) id) ys = xs.foldl (flip List.cons) ys := by
   induction xs generalizing ys with
   | nil => rfl
   | cons z zs ih =>
