@@ -71,19 +71,18 @@ def flatcat : (t : Tree a) → (xs: List a) → List a
 def Tree.flatten₁ (t : Tree a) : List a :=
  flatcat t []
 
-theorem flatten_eq_helper_accum (t : Tree a) (xs: List a) :
-  t.flatten ++ xs = flatcat t xs := by
+theorem flatten_eq_helper_accum (t : Tree a) (xs: List a)
+  : t.flatten ++ xs = flatcat t xs := by
   induction t generalizing xs with
   | null => rfl
   | node l x r ihl ihr =>
-    rw [flatcat, <- ihr]
-    rw [← ihl (x :: (r.flatten ++ xs))]
+    rw [flatcat, ←ihr]
+    rw [←ihl (x :: (r.flatten ++ xs))]
     rw [List.append_cons]
     rw [← List.append_assoc]
     rw [Tree.flatten]
 
-example (t: Tree a) :
-  t.flatten = t.flatten₁ := by
+example (t: Tree a) : t.flatten = t.flatten₁ := by
   induction t with
   | null => exact rfl
   | node l x r ihl ihr =>
