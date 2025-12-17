@@ -297,7 +297,7 @@ theorem length_tail_lt_length (sl : SymList a) (h : sl ≠ nil)
   unfold lengthSL tailSL
   simp
   by_cases k: lsl.isEmpty = true
-  · simp [k, nil]
+  · simp [nil]
     simp_all
     cases ok with
     | intro h1 h2 =>
@@ -305,8 +305,7 @@ theorem length_tail_lt_length (sl : SymList a) (h : sl ≠ nil)
       cases h1 with
       | inl l => simp_all; contradiction
       | inr m => simp [m]
-  · simp [k]
-    simp_all
+  · simp_all
     by_cases l: lsl.length = 1
     · simp [l, splitInTwoSL, Nat.min_def]
       by_cases q: (rsl.length + 1) / 2 ≤ rsl.length

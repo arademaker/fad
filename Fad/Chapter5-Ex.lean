@@ -373,7 +373,7 @@ def string_rsort : List (String → Char) → List String → List String
   | f::fs, xs => lists_concat (string_ptn f (string_rsort fs xs))
 
 def string_incresing_order : Nat → List (String → Char)
-  | sz => ((List.range sz).map (fun x => flip String.get ⟨x⟩))
+  | sz => ((List.range sz).map (fun x => flip String.Pos.Raw.get ⟨x⟩))
 
 
 -- #eval string_rsort (string_incresing_order 3) ["abc", "ghi"]
