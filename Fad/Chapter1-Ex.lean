@@ -256,6 +256,7 @@ example {α β : Type} (f : α → β → β) (e : β) :
     rw [ih, ← scanr_fst_eq_foldr]
     simp [List.scanr]
 
+
 /- # Exercicio 1.13 -/
 
 def apply {a : Type} : Nat → (a → a) → a → a

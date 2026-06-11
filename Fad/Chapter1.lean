@@ -1,22 +1,19 @@
 
+
 namespace Chapter1
 
 -- ## Section 1.1 Basic types and functions
 
-def map₁ (f : a → b) (xs : List a) : List b :=
+def map₁ {a b} (f : a → b) (xs : List a) : List b :=
  match xs with
  | [] => []
  | (x :: xs) => f x :: map₁ f xs
 
-def map₂ : (a → b) → List a → List b
-| _, [] => []
-| f, (x :: xs) => f x :: map₂ f xs
-
-def map (f : a → b) : List a → List b
+def map {a b} (f : a → b) : List a → List b
 | [] => []
 | (x :: xs) => f x :: map f xs
 
-example : map (· * 10) [1,2,3] = [10,20,30] :=
+example : map (· * 10) [1, 2, 3] = [10,20,30] :=
   rfl
 
 theorem map_equal {α β} (a : List α) (f : α → β)
@@ -30,7 +27,11 @@ theorem map_equal {α β} (a : List α) (f : α → β)
 def makeInc (n : Nat) : (Nat → Nat) :=
   fun x => x + n
 
--- #eval (makeInc 10) 45
+/--
+info: 55
+-/
+#guard_msgs in
+#eval (makeInc 10) 45
 
 def filter {a : Type} (p : a → Bool) : List a → List a
 | [] => []
@@ -38,13 +39,21 @@ def filter {a : Type} (p : a → Bool) : List a → List a
 
 example : filter (· > 5) [1,2,2,4,5,8,6] = [8,6] := rfl
 
--- #eval filter (λ x => x % 2 ≠ 0) [1,2,3,4,5,6,7,8,9,10]
+/--
+info: [1, 3, 5, 7, 9]
+-/
+#guard_msgs in
+#eval filter (· % 2 ≠ 0) (List.range 10)
 
 def foldr {a b : Type} (f : a → b → b) (e : b) : List a → b
 | []      => e
 | x :: xs => f x (foldr f e xs)
 
--- #eval foldr (λ x y => x + y) 0 [1,2,3]
+/--
+info: 6
+-/
+#guard_msgs in
+#eval foldr (λ x y => x + y) 0 [1,2,3]
 
 example : foldr Nat.add 0 [1,2,3] = 6 := by
  unfold foldr
@@ -54,7 +63,7 @@ example : foldr Nat.add 0 [1,2,3] = 6 := by
  rw [Nat.add]
 
 
-example {α : Type} : ∀ xs : List α, foldr List.cons [] xs = xs := by
+example {α} : ∀ xs : List α, foldr List.cons [] xs = xs := by
   intro xs
   induction xs with
   | nil =>
@@ -69,53 +78,22 @@ example {α : Type} : ∀ xs : List α, foldr List.cons [] xs = xs := by
 def label {α : Type} (xs : List α) : List (Nat × α) :=
   List.zip (List.range xs.length) xs
 
-
 def length₁ (xs : List a) : Nat :=
   foldr (fun _ y => y + 1) 0 xs
 
-def length₂ : List a → Nat :=
-  foldr succ 0
-  where succ _ n := n + 1
-
-def length₃ : List α → Nat :=
+def length₂ : List α → Nat :=
   let aux (_ : α) (n : Nat) : Nat := n + 1
   foldr aux 0
 
+def sum (as : List Nat) : Nat :=
+  foldr Nat.add 0 as
 
-example : length₂ ["a", "b", "c"] = 3 := by
-  unfold length₂
-  unfold foldr
-  unfold foldr
-  unfold foldr
-  rewrite [length₂.succ]
-  rewrite [length₂.succ]
-  rewrite [length₂.succ]
-  rewrite [foldr.eq_1]
-  rfl
-
-example : foldr Nat.add 0 [1,2,3] = 6 := by
-  unfold foldr
-  unfold foldr
-  unfold foldr
-  unfold foldr
-  rewrite (config := {occs := .pos [3]}) [Nat.add]
-  rewrite (config := {occs := .pos [2]}) [Nat.add]
-  rewrite (config := {occs := .pos [1]}) [Nat.add]
-  rfl
+def sum₁ : List Nat → Nat :=
+  foldr Nat.add 0
 
 def foldl {a b : Type} (f : b → a → b) (e : b) : List a → b
 | []      => e
 | x :: xs => foldl f (f e x) xs
-
-example : foldl Nat.add 0 [1,2,3] = 6 := by
-  unfold foldl
-  unfold foldl
-  unfold foldl
-  unfold foldl
-  rewrite (config := {occs := .pos [3]}) [Nat.add]
-  rewrite (config := {occs := .pos [2]}) [Nat.add]
-  rewrite (config := {occs := .pos [1]}) [Nat.add]
-  rfl
 
 def foldl₀ {a b : Type} (f : b → a → b) (e : b) : List a → b :=
   foldr (flip f) e ∘ List.reverse
@@ -158,10 +136,10 @@ def head {α : Type} [Inhabited α] : List α → α :=
   let f x _ := x
   List.foldr f default
 
-/-
-#eval head [Point.mk 1 2, Point.mk 3 4]
-#eval head ([] : List Point)
--/
+def head₁ {α : Type} : List α → Option α :=
+  let f x _ := some x
+  List.foldr f none
+
 
 def concat₁ {a : Type} : List (List a) → List a :=
  List.foldr List.append []
@@ -169,7 +147,7 @@ def concat₁ {a : Type} : List (List a) → List a :=
 def concat₂ {a : Type} : List (List a) → List a :=
  List.foldl List.append []
 
-example : concat₁ [[1,2,3,4], [5], [6]] = [1,2,3,4,5,6] := by
+example : concat₁ [[1,2], [5], [6]] = [1,2,5,6] := by
   unfold concat₁
   unfold List.foldr
   unfold List.foldr
@@ -180,12 +158,10 @@ example : concat₁ [[1,2,3,4], [5], [6]] = [1,2,3,4,5,6] := by
   rw [List.append.eq_2]
   rw [List.append.eq_2]
   rw [List.append.eq_1]
-  rw [List.append.eq_2]
   rw [List.append.eq_1]
-  rw [List.append.eq_2]
   rw [List.append.eq_1]
 
-example : concat₂ [[1,2,3,4], [5], [6]] = [1,2,3,4,5,6] := by
+example : concat₂ [[1,2], [5], [6]] = [1,2,5,6] := by
   unfold concat₂
   unfold List.foldl
   unfold List.foldl
@@ -196,20 +172,23 @@ example : concat₂ [[1,2,3,4], [5], [6]] = [1,2,3,4,5,6] := by
   rw [List.append.eq_2]
   rw [List.append.eq_2]
   rw [List.append.eq_2]
-  rw [List.append.eq_2]
-  rw [List.append.eq_2]
-  rw [List.append.eq_2]
-  rw [List.append.eq_2]
   rw [List.append.eq_1]
   rw [List.append.eq_2]
   rw [List.append.eq_1]
 
 
-def scanl : (b → a → b ) → b → List a → List b
-| _, e, [] => [e]
-| f, e, (x :: xs) => e :: scanl f (f e x) xs
+def scanl {b a} (f : b → a → b ) : b → List a → List b
+| e, [] => [e]
+| e, (x :: xs) => e :: scanl f (f e x) xs
 
 /-
+ghci> foldl (+) 0 (take 5 [1..])
+15
+ghci> foldr (+) 0 (take 5 [1..])
+15
+ghci> take 5 (scanl (+) 0 [1..])
+[0,1,3,6,10]
+
 #eval scanl Nat.add 0 [1,2,3,4]
 #eval scanl Nat.add 42 []
 #eval scanl (λ r n => n :: r)
@@ -224,122 +203,128 @@ def scanr₀ {a b : Type} (f : a → b → b) (q₀ : b) (as : List a) : List b 
     Subtype.mk (f x (List.head qs qs.property) :: qs) (by simp)
  aux as
 
-def scanr : (a → b → b) → b → List a → List b
-| _, q₀, [] => [q₀]
-| f, q₀, (x :: xs) =>
-  match scanr f q₀ xs with
+def scanr {a b} (f : a → b → b) : b → List a → List b
+| e, [] => [e]
+| e, (x :: xs) =>
+  match scanr f e xs with
   | [] => []
   | qs@(q :: _) => f x q :: qs
 
-/-
-#eval scanr Nat.add 0 [1,2,3,4]
-#eval scanr Nat.add 42 []
+/--
+info: true
 -/
+#guard_msgs in
+#eval scanr₀ Nat.add 0 [1,2,3] = [1, 2, 3].scanr Nat.add 0
+
 
 -- ## Section 1.3 Inductive and recursive definitions
 
-def inserts {a : Type} (x : a) : List a → List (List a)
+def inserts {a} (x : a) : List a → List (List a)
 | []      => [[x]]
 | y :: ys => (x :: y :: ys) :: map (y :: ·) (inserts x ys)
 
--- #eval inserts 1 [2,3,4]
-
-
-def concatMap (f : a → List b) : List a → List b :=
+def concatMap {a b} (f : a → List b) : List a → List b :=
  concat₁ ∘ (List.map f)
 
--- #eval concatMap (String.toList ·) ["foo", "bar" ]
 
-def perm₁ : List a → List (List a)
+/- Next, we have four recursive definitions of perm1. -/
+
+def perms1₁ {a} : List a → List (List a)
  | [] => [[]]
- | (x :: xs) => concatMap (inserts x ·) (perm₁ xs)
+ | x :: xs =>
+   concat₁ <| (perms1₁ xs).map (inserts x ·)
 
-def perm₁' : List a → List (List a) :=
+def perms1₂ {a} : List a → List (List a)
+ | [] => [[]]
+ | (x :: xs) => (perms1₂ xs).flatMap (inserts x ·)
+
+def perms1₃ {a} : List a → List (List a) :=
  foldr step [[]]
  where
-  step x xss := concatMap (inserts x) xss
+  step x := List.flatMap (inserts x)
 
-def perm₁'' : List a → List (List a) :=
-  foldr (concatMap ∘ inserts) [[]]
+def perms1₄ {a} : List a → List (List a) :=
+  foldr (List.flatMap ∘ inserts) [[]]
 
-def perm₁''' (xs : List a) : List (List a) :=
-  foldr step [[]] xs
- where
-   step a b := concatMap (inserts a) b
 
--- #eval perm₁ (List.range 5) |>.length
-
-def picks {a : Type} : List a → List (a × List a)
+def picks {a} : List a → List (a × List a)
 | []      => []
 | x :: xs =>
   (x, xs) :: ((picks xs).map (λ p => (p.1, x :: p.2)))
 
-theorem picks_length {a : Type} (xs : List a)
-  (ps : List (a × List a))
-  : ps = picks xs → ps.all (λ p => p.2.length < xs.length) := by
-  simp
-  intro h x ys h1
-  induction xs with
-  | nil => rw [picks.eq_def] at h ; simp_all
-  | cons b bs ih =>
-    rw [picks] at h
-    simp [List.length]
-    rw [h] at ih
-    rw [← picks] at ih
-    sorry
 
--- #eval picks [1,2,3,4]
-
-partial def perm₂ {a : Type} : List a → List (List a)
+/--
+`partial` because Lean cannot verify termination: `p` comes from `concatMap`
+with no proof that `p ∈ picks xs`, so `p.2.length < xs.length` is unknown.
+-/
+partial def perms2₁ {a : Type} : List a → List (List a)
   | [] => [[]]
   | xs =>
-    let subperms p := (perm₂ p.2).map (p.1 :: ·)
+    let subperms p := (perms2₁ p.2).map (p.1 :: ·)
     concatMap subperms (picks xs)
 
 
 theorem picks_decreases {a : Type} (xs : List a)
  : ∀ p, p ∈ picks xs → p.2.length < xs.length := by
  induction xs with
- | nil =>
-   intro p h
-   cases h
+ | nil => intro p h; cases h
  | cons x xs ih =>
    intro p h
    simp [picks] at h
-   cases h with
-   | inl peq =>
-     simp [peq, List.length]
-   | inr hex =>
-     cases hex with
-     | intro a₁ h₁ =>
-       cases h₁ with
-       | intro b h₂ =>
-         cases h₂ with
-         | intro hmem peq =>
-           have h₁ := congrArg Prod.snd peq
-           rw [h₁.symm]
-           simp [List.length]
-           exact ih (a₁, b) hmem
+   rcases h with rfl | ⟨q, hq, hmem, rfl⟩
+   · simp
+   · simp [ih (q, hq) hmem]
 
 
-def perm₃ {a : Type} : List a → List (List a)
+/--
+ Uses `List.pmap` to map with a proof: each `p` receives `hp : p ∈ picks xs`,
+ from which `picks_decreases` gives the termination witness. -/
+def perms2₂ {a : Type} : List a → List (List a)
   | [] => [[]]
-  | x :: xs => concatMap (λ ⟨p, hp⟩ ↦
-      have : p.2.length < (x :: xs).length := by
-        apply picks_decreases (x :: xs)
+  | xs =>
+    let subperms := fun p (hp : p ∈ picks xs) =>
+      have := picks_decreases xs p hp
+      (perms2₂ p.2).map (p.1 :: ·)
+    (picks xs).pmap subperms (fun _ h => h) |>.flatten
+termination_by xs => xs.length
+
+/-- Uses `List.attach` to pair each element with its membership proof, then
+    pattern-matches on `⟨p, hp⟩` to obtain `hp : p ∈ picks xs` inline. -/
+def perms2₃ {a : Type} : List a → List (List a)
+  | [] => [[]]
+  | xs => concatMap (λ ⟨p, hp⟩ ↦
+      have h : p.2.length < xs.length := by
+        apply picks_decreases xs
         exact hp
-      (perm₃ p.2).map (p.1 :: ·))
-      (picks (x :: xs)).attach
- termination_by xs => xs.length
+      (perms2₃ p.2).map (p.1 :: ·))
+      (picks xs).attach
+termination_by xs => xs.length
+
+/--
+ Avoids `attach`/`pmap` by using an explicit helper `go` that threads the
+ membership proof `∀ p, p ∈ ps → p.2.length < xs.length` through the recursion.
+ Requires a lexicographic termination measure `(xs.length, ps.length)`.  -/
+def perms2₄ {a : Type} : List a → List (List a)
+  | [] => [[]]
+  | xs =>
+    let rec go : (ps : List (a × List a)) →
+      (∀ p, p ∈ ps → p.2.length < xs.length) → List (List a)
+     | [], _ => []
+     | p :: ps, h =>
+        have _hp := h p List.mem_cons_self
+        (perms2₄ p.2).map (p.1 :: ·)
+        ++ go ps (fun q hq => h q (List.mem_cons_of_mem _ hq))
+      termination_by ps => (xs.length, ps.length)
+    go (picks xs) (picks_decreases xs)
+termination_by xs => (xs.length, (picks xs).length + 1)
 
 
-partial def until' (p: a → Bool) (f: a → a) (x : a) : a :=
+partial def until' {a} (p : a → Bool) (f : a → a) (x : a) : a :=
   if p x then x
   else until' p f (f x)
 
-partial def while' (p : a → Bool) := until' (not ∘ p)
-
--- #eval until' (· > 10) (· + 1) 0
+partial def while' {a} (p : a → Bool) :=
+  until' (not ∘ p)
 
 
 -- ## Section 1.4 Fusion

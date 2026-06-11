@@ -10,5 +10,10 @@ name = "main"
 root = "Main"
 
 [[require]]
+name = "cslib"
+scope = "leanprover"
+
+[[require]]
 name = "mathlib"
 scope = "leanprover-community"
+

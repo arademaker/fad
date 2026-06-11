@@ -32,7 +32,6 @@ def consSL : α  → SymList α → SymList α
 | z, (xs, []) => ([z], xs)
 | z, (xs, ys) => (z :: xs, ys)
 
-
 /-
 example (x : α) (xs : SymList α)
  : (snoc x ∘ fromSL) xs = (fromSL ∘ snocSL x) xs
@@ -92,8 +91,8 @@ def fromSL (sl : SymList a) : List a :=
  sl.lhs ++ sl.rhs.reverse
 
 def consSL : a → SymList a → SymList a
-| z, ⟨xs, [], _⟩ => SymList.mk [z] xs (by simp)
-| z, ⟨xs, y :: ys, _⟩ => SymList.mk (z :: xs) (y :: ys) (by simp)
+| z, ⟨xs, [], h⟩ => SymList.mk [z] xs (by simp)
+| z, ⟨xs, y :: ys, h⟩ => SymList.mk (z :: xs) (y :: ys) (by simp)
 
 def snocSL : a → SymList a → SymList a
 | z, ⟨ [], bs, _ ⟩ => ⟨bs, [z], by simp⟩
