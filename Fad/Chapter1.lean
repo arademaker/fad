@@ -1,4 +1,5 @@
 
+import Mathlib.Tactic
 
 namespace Chapter1
 
@@ -181,6 +182,7 @@ def scanl {b a} (f : b → a → b ) : b → List a → List b
 | e, [] => [e]
 | e, (x :: xs) => e :: scanl f (f e x) xs
 
+
 /-
 ghci> foldl (+) 0 (take 5 [1..])
 15
@@ -276,35 +278,38 @@ theorem picks_decreases {a : Type} (xs : List a)
    · simp [ih (q, hq) hmem]
 
 
-/--
- Uses `List.pmap` to map with a proof: each `p` receives `hp : p ∈ picks xs`,
- from which `picks_decreases` gives the termination witness. -/
-def perms2₂ {a : Type} : List a → List (List a)
-  | [] => [[]]
-  | xs =>
-    let subperms := fun p (hp : p ∈ picks xs) =>
-      have := picks_decreases xs p hp
-      (perms2₂ p.2).map (p.1 :: ·)
-    (picks xs).pmap subperms (fun _ h => h) |>.flatten
-termination_by xs => xs.length
-
 /-- Uses `List.attach` to pair each element with its membership proof, then
     pattern-matches on `⟨p, hp⟩` to obtain `hp : p ∈ picks xs` inline. -/
-def perms2₃ {a : Type} : List a → List (List a)
+def perms2₂ {a : Type} : List a → List (List a)
   | [] => [[]]
   | xs => concatMap (λ ⟨p, hp⟩ ↦
-      have h : p.2.length < xs.length := by
+      have : p.2.length < xs.length := by
         apply picks_decreases xs
         exact hp
-      (perms2₃ p.2).map (p.1 :: ·))
+      (perms2₂ p.2).map (p.1 :: ·))
       (picks xs).attach
 termination_by xs => xs.length
 
-/--
- Avoids `attach`/`pmap` by using an explicit helper `go` that threads the
- membership proof `∀ p, p ∈ ps → p.2.length < xs.length` through the recursion.
- Requires a lexicographic termination measure `(xs.length, ps.length)`.  -/
+
+def picks₁ {a} : (xs : List a) → List { r : a × List a // r.2.length < xs.length }
+| []      => []
+| x :: xs =>
+  let rs := picks₁ xs
+  ⟨(x, xs),by grind⟩ :: (picks₁ xs).map (λ r => ⟨(r.val.1, x :: r.val.2), by grind⟩)
+
 def perms2₄ {a : Type} : List a → List (List a)
+  | [] => [[]]
+  | xs => concatMap (λ ⟨p, _hp⟩ ↦
+      (perms2₄ p.2).map (p.1 :: ·))
+      (picks₁ xs)
+termination_by xs => xs.length
+
+
+/--
+ Avoids `attach` by using an explicit helper `go` that threads the membership
+ proof `∀ p, p ∈ ps → p.2.length < xs.length` through the recursion. Requires a
+ lexicographic termination measure `(xs.length, ps.length)`.  -/
+def perms2₅ {a : Type} : List a → List (List a)
   | [] => [[]]
   | xs =>
     let rec go : (ps : List (a × List a)) →
@@ -312,7 +317,7 @@ def perms2₄ {a : Type} : List a → List (List a)
      | [], _ => []
      | p :: ps, h =>
         have _hp := h p List.mem_cons_self
-        (perms2₄ p.2).map (p.1 :: ·)
+        (perms2₅ p.2).map (p.1 :: ·)
         ++ go ps (fun q hq => h q (List.mem_cons_of_mem _ hq))
       termination_by ps => (xs.length, ps.length)
     go (picks xs) (picks_decreases xs)
@@ -371,21 +376,6 @@ theorem foldr_fusion {a b c : Type}
     rfl
 
 
-example {a : Type} : ∀ xs : List a, [] ++ xs = xs := by
- intro h1
- induction h1 with
- | nil => rfl
- | cons ha hs => grind
-
-
-example {a b : Type} (xs ys : List a) (f : a → b → b) (e : b)
- : List.foldr f e (xs ++ ys) = List.foldr f (List.foldr f e ys) xs
- := by
- induction xs with
- | nil => rfl
- | cons x xs ih => simp
-
-
 example {a b : Type} (xs ys : List a) (f : a → b → b) (e : b)
  : List.foldr f e (xs ++ ys) = List.foldr f (List.foldr f e ys) xs
  := by
@@ -401,23 +391,6 @@ example {a b : Type} (xs ys : List a) (f : a → b → b) (e : b)
 
 
 example {a b : Type} (f : a → b → b) (e : b)
- : List.foldr f e ∘ concat₁ = List.foldr (flip (List.foldr f)) e
- := by
- funext xs
- induction xs with
- | nil =>
-   rw [List.foldr, Function.comp]
-   simp [concat₁]
- | cons y ys ih =>
-   rw [Function.comp]
-   simp [concat₁]
-   rw [←concat₁]
-   rw [flip]
-   rw [← ih]
-   rw [Function.comp]
-
-
-example {a b : Type} (f : a → b → b) (e : b)
   : List.foldr f e ∘ concat₁ = List.foldr (flip (List.foldr f)) e
   := by
   funext xss
@@ -429,6 +402,13 @@ example {a b : Type} (f : a → b → b) (e : b)
   apply foldr_fusion f₁ e₁ xss g h
   intro xs ys
   simp [f₁, h, g, flip]
+
+
+example {f : α → β} {p : α → Bool}
+  : List.map f ∘ List.filter p ∘ List.flatten = List.flatMap (List.map f ∘ List.filter p) := by
+  funext xs
+  induction' xs with a as ih
+  all_goals grind
 
 
 def inits {a : Type} : List a → List (List a)
@@ -457,7 +437,6 @@ def collapse₀ (xss : List (List Int)) : List Int :=
        simp at h
        intro contra
        exact h.right contra
-
       have : xss.length - 1 < xss.length := by
        cases xss with
        | nil       => contradiction
@@ -502,11 +481,52 @@ def collapse₃ (xss : List (List Int)) : List Int :=
   help (0, id) (labelsum xss) []
 
 
-example : collapse₃ [[1],[-3],[2,4]] = [1] :=
-  rfl
+private lemma collapse₀_eq_collapse₁ : collapse₀ = collapse₁ := by
+  funext xss
+  simp only [collapse₀, collapse₁]
+  suffices h : ∀ xs, collapse₀.help xs xss = collapse₁.help xs xss by exact h []
+  intro xs
+  induction xss generalizing xs with
+  | nil =>
+    unfold collapse₀.help collapse₁.help
+    simp
+  | cons as bss ih =>
+    unfold collapse₀.help collapse₁.help
+    by_cases hpos : xs.sum > 0
+    · simp [hpos]
+    · simp only [hpos, ↓reduceIte, List.isEmpty, List.tail, List.head]
+      exact ih _
 
-example : collapse₃ [[-2,1],[3],[2,4]] = [-2, 1, 3] :=
-  rfl
+-- The invariant needs f = (xs ++ ·) pointwise, not just f [] = xs,
+-- because the recursive step applies f to `as` (not just []).
+private lemma collapse₁_help_eq (xss : List (List Int))
+  : ∀ (xs : List Int) (s : Int) (f : List Int → List Int),
+      s = xs.sum → (∀ ys, f ys = xs ++ ys) →
+      collapse₁.help xs xss =
+        collapse₃.help (s, f) (List.zip (map List.sum xss) xss) [] := by
+  induction xss with
+  | nil =>
+    intros xs s f _ hf
+    simp [collapse₁.help, collapse₃.help, hf]
+  | cons as bss ih =>
+    intros xs s f hs hf
+    simp only [collapse₁.help, collapse₃.help, map, List.zip, List.zipWith]
+    by_cases hpos : xs.sum > 0
+    · have hs2 : s > 0 := hs ▸ hpos
+      simp [hpos, hs2, hf]
+    · have hs2 : ¬ s > 0 := hs ▸ hpos
+      simp only [hpos, hs2, ↓reduceIte]
+      apply ih
+      · simp [hs, List.sum_append]
+      · intro ys; simp [hf, List.append_assoc]
+
+private lemma collapse₁_eq_collapse₃ : collapse₁ = collapse₃ := by
+  funext xss
+  simp only [collapse₁, collapse₃]
+  exact collapse₁_help_eq xss [] 0 ([] ++ ·) (by simp) (by simp)
+
+example : collapse₀ = collapse₃ := by
+  rw [collapse₀_eq_collapse₁, collapse₁_eq_collapse₃]
 
 
 end Chapter1
