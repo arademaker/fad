@@ -5,7 +5,15 @@ namespace Chapter1
 
 /- # Exercicio 1.1 -/
 
-def dropWhile (p : α → Bool) : (xs : List α) → List α
+def inits {a} : List a → List (List a)
+| [] => [[]]
+| (x :: xs) => [] :: (inits xs).map (fun ys => x :: ys)
+
+def tails {a} : List a → List (List a)
+| [] => [[]]
+| (x :: xs) => (x :: xs) :: tails xs
+
+def dropWhile {α} (p : α → Bool) : (xs : List α) → List α
 | [] => []
 | (x :: xs) => if p x then dropWhile p xs else x :: xs
 
@@ -235,14 +243,6 @@ example {a b : Type} (f : b → a → b) (e : b) :
     rw [← ih (f e x)]
     simp
 
-theorem scanr_fst_eq_foldr (f : α → β → β) (e : β) (xs : List α) :
-  (List.foldr (fun a (b, l) => (f a b, b :: l)) (e, []) xs).1 = List.foldr f e xs := by
-  induction xs with
-  | nil => rfl
-  | cons y ys ih =>
-    rw [List.foldr]
-    simp [ih]
-
 example {α β : Type} (f : α → β → β) (e : β) :
   List.map (List.foldr f e) ∘ tails = List.scanr f e := by
   funext xs
@@ -252,9 +252,7 @@ example {α β : Type} (f : α → β → β) (e : β) :
     simp [tails, List.scanr]
   | cons y ys ih =>
     rw [Function.comp] at ih
-    rw [Function.comp, tails, List.map]
-    rw [ih, ← scanr_fst_eq_foldr]
-    simp [List.scanr]
+    rw [Function.comp, tails, List.map, ih, List.scanr_cons]
 
 
 /- # Exercicio 1.13 -/

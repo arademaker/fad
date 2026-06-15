@@ -38,7 +38,7 @@ def filter {a : Type} (p : a → Bool) : List a → List a
 | [] => []
 | x :: xs => if p x then x :: filter p xs else filter p xs
 
-example : filter (· > 5) [1,2,2,4,5,8,6] = [8,6] := rfl
+example : filter (· > 5) [1,4,5,8,6] = [8,6] := rfl
 
 /--
 info: [1, 3, 5, 7, 9]
@@ -295,7 +295,8 @@ def picks₁ {a} : (xs : List a) → List { r : a × List a // r.2.length < xs.l
 | []      => []
 | x :: xs =>
   let rs := picks₁ xs
-  ⟨(x, xs),by grind⟩ :: (picks₁ xs).map (λ r => ⟨(r.val.1, x :: r.val.2), by grind⟩)
+  ⟨(x, xs), by grind⟩ :: (picks₁ xs).map
+    (λ r => ⟨(r.val.1, x :: r.val.2), by grind⟩)
 
 def perms2₄ {a : Type} : List a → List (List a)
   | [] => [[]]
@@ -404,24 +405,15 @@ example {a b : Type} (f : a → b → b) (e : b)
   simp [f₁, h, g, flip]
 
 
-example {f : α → β} {p : α → Bool}
-  : List.map f ∘ List.filter p ∘ List.flatten = List.flatMap (List.map f ∘ List.filter p) := by
+example {α β} {f : α → β} {p : α → Bool}
+  : List.map f ∘ List.filter p ∘ List.flatten = List.flatMap (List.map f ∘ List.filter p)
+  := by
   funext xs
   induction' xs with a as ih
   all_goals grind
 
-
-def inits {a : Type} : List a → List (List a)
-| [] => [[]]
-| (x :: xs) => [] :: (inits xs).map (fun ys => x :: ys)
-
-def tails {a : Type} : List a → List (List a)
-| [] => [[]]
-| (x :: xs) => (x :: xs) :: tails xs
-
 theorem foldl_comp {α β: Type} (y: α) (e : β) (f : β → α → β):
  List.foldl f e ∘ (fun x => y :: x) = List.foldl f (f e y) := by rfl
-
 
 
 -- ## Seciton 1.5 Accumulating and tupling
@@ -441,7 +433,6 @@ def collapse₀ (xss : List (List Int)) : List Int :=
        cases xss with
        | nil       => contradiction
        | cons _ _  => simp
-
       help (xs.append $ xss.head h₁) xss.tail
   termination_by xss.length
 
