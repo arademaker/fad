@@ -223,8 +223,7 @@ def mkTree [LT α] [DecidableRel (α := α) (· < ·)]
  decreasing_by
   all_goals
    simp [List.partition_eq_filter_filter,
-         List.length_filter_le,
-         Nat.lt_add_one_of_le]
+         List.length_filter_le]
 
 end BST1
 
@@ -405,12 +404,12 @@ inductive Piece (α : Type) : Type
 
 @[simp]
 theorem flatten_left_lt  {α : Type}
-    {t : Tree α} {h : Nat} {l r : Tree α} {x : α}
-    (ht : t = Tree.node h l x r) :
+    {t : BST2.Tree α} {h : Nat} {l r : BST2.Tree α} {x : α}
+    (ht : t = BST2.Tree.node h l x r) :
     (Tree.flatten t).length > (Tree.flatten l).length := by
   subst ht
   have :
-    (Tree.flatten (Tree.node h l x r)).length = (Tree.flatten l).length + 1 + (Tree.flatten r).length := by
+    (Tree.flatten (BST2.Tree.node h l x r)).length = (Tree.flatten l).length + 1 + (Tree.flatten r).length := by
     simp [Tree.flatten, List.length_append, List.length_cons]
     omega
   simp

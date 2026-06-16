@@ -34,8 +34,7 @@ theorem qsort₀_eq_qsort₁ (xs : List a) : qsort₀ xs = qsort₁ xs := by
 termination_by xs.length
 decreasing_by
   all_goals simp
-  all_goals rw [Nat.lt_add_one_iff]
-  all_goals simp [List.length_filter_le]
+  all_goals grind
 
 end
 

@@ -309,16 +309,10 @@ theorem length_tail_lt_length (sl : SymList a) (h : sl ≠ nil)
     · simp [l, splitInTwoSL, Nat.min_def]
       by_cases q: (rsl.length + 1) / 2 ≤ rsl.length
       · simp [q]
-      simp [q, instHSub]
+      simp [q]
       omega
     simp [l]
-    apply Nat.sub_lt_self
-    simp
-    have h : 0 < lsl.length := by
-      cases lsl with
-      | nil => contradiction
-      | cons _ _ => simp
-    simp [Nat.succ_le_iff, h]
+    grind
 
 theorem headSL_none_iff_nilSL {sl : SymList a} : headSL sl = none ↔ sl = nil := by
   apply Iff.intro <;> intro h
@@ -458,17 +452,13 @@ theorem tails_append_singleton (xs : List α) (x : α) :
 theorem map_reverse_tails_snoc (x : α) (xs : List α) :
     List.map reverse (snoc x xs).tails =
       List.map (fun ys : List α => x :: reverse ys) xs.tails ++ [[]] := by
-  simp [snoc, tails_append_singleton, List.map_append, List.map_map, Function.comp]
+  simp [snoc, List.map_append, List.map_map, Function.comp]
 
 theorem map_reverse (f : α → β) (xs : List α) :
     List.map f xs.reverse = (List.map f xs).reverse := by
   induction xs
   all_goals
   simp
-
-theorem scanl_cons {α β}
-        (f : β → α → β) (b : β) (a : α) (as : List α) :
-    List.scanl f b (a :: as) = b :: List.scanl f (f b a) as := rfl
 
 theorem fromSL_snoc {α} (z : α) (sl : SymList α) :
     SymList.fromSL (SymList.snocSL z sl) = SymList.fromSL sl ++ [z] := by
@@ -499,7 +489,8 @@ theorem fromSL_snoc {α} (z : α) (sl : SymList α) :
                         simp at this
                   cases hFalse
       | cons a as =>
-          simp [SymList.snocSL, SymList.fromSL, List.reverse_cons, List.append_assoc]
+          simp [SymList.snocSL, SymList.fromSL, List.reverse_cons,
+            List.append_assoc]
 
 
 theorem inits_eq {a : Type} : ∀ xs : List a, inits₁ xs = inits₂ xs

@@ -172,8 +172,7 @@ theorem partition3_length {a : Type} [LT a] [DecidableRel (α := a) (· < ·)]
   | cons x xs ih =>
     simp [partition3]
     by_cases k: x < y
-    · simp at *
-      repeat rw [← partition3]
+    · repeat rw [← partition3]
       simp [k]
       rw [← ih]
       rfl

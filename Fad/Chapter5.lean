@@ -26,8 +26,7 @@ def mkTree: List a → Tree a
  termination_by l => l.length
  decreasing_by
   all_goals simp
-   [List.partition_eq_filter_filter,
-    List.length_filter_le, Nat.lt_add_one_of_le]
+   [List.partition_eq_filter_filter, List.length_filter_le]
 
 def Tree.flatten : Tree a → List a
 | null => []
@@ -44,8 +43,7 @@ def qsort₁ : List a → List a
  termination_by xs => xs.length
  decreasing_by
   all_goals simp
-   [List.partition_eq_filter_filter,
-    List.length_filter_le, Nat.lt_add_one_of_le]
+   [List.partition_eq_filter_filter, List.length_filter_le]
 
 
 def qsort₂ [Ord a] (f : a → a → Ordering) : List a → List a
@@ -56,8 +54,7 @@ def qsort₂ [Ord a] (f : a → a → Ordering) : List a → List a
  termination_by xs => xs.length
  decreasing_by
   all_goals simp
-   [List.partition_eq_filter_filter,
-    List.length_filter_le, Nat.lt_add_one_of_le]
+   [List.partition_eq_filter_filter, List.length_filter_le]
 
 /-
 #eval qsort₁ (List.iota 145)

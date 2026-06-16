@@ -43,8 +43,7 @@ theorem length_lt_of_cons_split {α : Type} (xs ys zs : List α)
       | mk ys' zs' =>
         cases heq
         specialize ih ys' zs' hin
-        simp [List.length]
-        exact Nat.lt_succ_of_lt ih
+        grind
 
 def parts {a : Type} : List a → List (Partition a)
   | [] => [[]]
