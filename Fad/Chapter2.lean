@@ -1,9 +1,13 @@
 import Fad.Chapter1
 import Fad.«Chapter1-Ex»
 import Lean
+import Cslib.Algorithms.Lean.TimeM
 
 namespace Chapter2
+
 open Chapter1 (dropWhile)
+open Cslib.Algorithms.Lean
+open TimeM
 
 -- # 2.0 Complexity
 
@@ -37,33 +41,84 @@ example : fibFast 4 = 5 := by
 
 -- # 2.2 Estimating running times
 
-/-
-#eval List.append [1,2,3] [4,5,6]
-#eval List.head! (List.iota 1000)
--/
+def append' {a} : List a → List a → TimeM Nat (List a)
+  | [], ys => pure ys
+  | x :: xs, ys => do
+      ✓ return x :: (← append' xs ys)
 
-def concat₀ : List (List a) → List a
- | [] => []
- | (xs :: xss) => xs ++ concat₀ xss
+def concat₁' {a} : List (List a) → TimeM Nat (List a) :=
+  List.foldr (fun xs tys => do
+    let ys ← tys
+    ✓[xs.length] return xs ++ ys) (pure [])
 
-def concat₁ (xss : List (List a)) : List a :=
- -- dbg_trace "concat₁ with {xss.length}"
- match xss with
-  | [] => []
-  | (xs :: xss) => xs ++ concat₁ xss
+def concat₂' {a} : List (List a) → TimeM Nat (List a) :=
+  List.foldl (fun txs ys => do
+    let xs ← txs
+    ✓[xs.length] return xs ++ ys) (pure [])
 
-/-
-#eval concat₁ [[1, 2], [3, 4], [5, 6]]
+/- an alternative approach is to redefine concat₂ recursive, not depend on
+foldl. it could be eventually easier to the proofs below. -/
+def concat₂'' {a} : List (List a) → TimeM Nat (List a) → TimeM Nat (List a)
+ | [], t => t
+ | xs :: xss, t =>  do
+   let res ← t
+   concat₂'' xss (do ✓[res.length] return res ++ xs)
 
-#eval timeit "concat₁" (pure $
-  Chapter1.concat₁
-   (List.replicate 2000 <| List.replicate 100 1) |>.length)
 
-#eval timeit "concat₂" (pure $
-  Chapter1.concat₂
-   (List.replicate 2000 <| List.replicate 100 1) |>.length)
+private lemma concat₁_step {a : Type*}
+  (xs : List a) (xss' : List (List a)) :
+  (concat₁' (xs :: xss')).time = (concat₁' xss').time + xs.length := by
+  simp [concat₁', List.foldr]
 
--/
+/- if `xss` is a list of length `m` consisting of lists each of length `n`, then
+`concat₁` is `Θ(m * n)` -/
+theorem concat₁_time (xss : List (List a))
+  (n : Nat) (h : ∀ xs ∈ xss, xs.length = n)
+  : (concat₁' xss).time = xss.length * n := by
+  induction xss with
+  | nil => simp [concat₁', List.foldr]
+  | cons xs xss' ih =>
+    have h₁ : xs.length = n := h xs List.mem_cons_self
+    have h₂ : ∀ ys ∈ xss', ys.length = n := by
+      intro ys hys
+      exact h ys (List.mem_cons_of_mem xs hys)
+    rw [concat₁_step, ih h₂, h₁, List.length_cons]
+    ring
+
+private lemma concat₂_foldl_tb {a}
+  (xss : List (List a)) (n k : Nat)
+  (h : ∀ xs ∈ xss, xs.length = n)
+  (acc : TimeM Nat (List a))
+  (hacc : acc.ret.length = k * n)
+  : (List.foldl (fun txs ys => do
+       let xs ← txs
+       tick xs.length
+       pure (xs ++ ys)) acc xss).time
+      ≤ acc.time + (k + xss.length) * n * xss.length := by
+  induction xss generalizing k acc with
+  | nil => simp
+  | cons ys xss' ih =>
+    simp only [List.foldl, List.length_cons]
+    have hys : ys.length = n := h ys List.mem_cons_self
+    have hxss' : ∀ zs ∈ xss', zs.length = n :=
+      fun zs hzs => h zs (List.mem_cons_of_mem ys hzs)
+    set acc' : TimeM Nat (List a) := do let xs ← acc; tick xs.length; pure (xs ++ ys)
+    have hacc'_time : acc'.time = acc.time + k * n := by simp [acc', hacc]
+    have hacc'_len : acc'.ret.length = (k + 1) * n := by
+      simp [acc', List.length_append, hacc, hys]; ring
+    have ih' := ih (h := hxss') (k := k + 1) (acc := acc') (hacc := hacc'_len)
+    nlinarith [Nat.zero_le xss'.length, Nat.zero_le k, Nat.zero_le n]
+
+/- if `xss` is a list of length `m` consisting of lists each of length `n`, then
+`concat₂` is `O(m^2 * n)` but also Θ(m2 n) ?? -/
+theorem concat₂_time (xss : List (List a))
+  (n : Nat) (h : ∀ xs ∈ xss, xs.length = n)
+  : (concat₂' xss).time ≤ xss.length ^ 2 * n := by
+  have h1 := concat₂_foldl_tb xss n 0 h (pure []) (by simp)
+  unfold concat₂'
+  simp at *
+  linarith [Nat.pow_two xss.length]
+
 
 -- # 2.4 Amortised running times
 

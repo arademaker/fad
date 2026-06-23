@@ -19,8 +19,7 @@ def dropWhile {α} (p : α → Bool) : (xs : List α) → List α
 
 /- # Exercicio 1.2 -/
 
-def uncons {α : Type} (xs : List α) : Option (α × List α) :=
-  match xs with
+def uncons {α : Type} : (xs : List α) → Option (α × List α)
   | [] => none
   | x :: xs => some (x, xs)
 
@@ -29,8 +28,9 @@ def uncons {α : Type} (xs : List α) : Option (α × List α) :=
 
 def wrap {α : Type} (a : α) : List α := [a]
 
-example : wrap 0 = [0] := rfl
-example : wrap [42] = [[42]] := rfl
+example : ∀ x : a, wrap x = [x] := by
+  unfold wrap
+  grind
 
 def unwrap {α : Type} (a : List α) : Option α :=
   match a with
@@ -39,11 +39,7 @@ def unwrap {α : Type} (a : List α) : Option α :=
 
 def unwrap! {α : Type} [Inhabited α]  : (a : List α) → α
  | [x] => x
- | _   => panic! "unwrap!: empty list"
-
-example : unwrap [42] = some 42 := rfl
-example : unwrap [0, 1] = none := rfl
-example : unwrap (@List.nil Nat) = none := rfl
+ | _   => panic! "unwrap!: not single list"
 
 def single {α : Type} (a : List α) : Bool :=
   match a with
@@ -54,19 +50,14 @@ example : single [42] = true := rfl
 example : single [0, 1] = false := rfl
 example : single ([] : List Nat) = false := rfl
 
-theorem single_aux {x : Nat} {xs : List Nat}
-  : single (x :: xs) = true ↔ xs = [] := by
-  cases xs with
-  | nil => simp [single]
-  | cons a xs => simp [single]
-
-example : ∀ xs : List Nat, single xs = true ↔ xs.length = 1 := by
+example : ∀ xs : List Nat, single xs ↔ xs.length = 1 := by
   intro xs
   induction xs with
   | nil => simp [single]
-  | cons x xs _ =>
-    rw [single_aux]
-    simp [List.length]
+  | cons x xs ih =>
+    cases xs with
+    | nil => simp [single]
+    | cons a xs => simp [single]
 
 
 /- # Exercicio 1.4 -/
